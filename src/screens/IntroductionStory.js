@@ -205,13 +205,18 @@ export default function IntroductionStory({ navigation, route }) {
     <View style={styles.container}>
       <Animated.View
         style={[
-          styles.content,
+          styles.contentWrapper,
           {
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           },
         ]}
       >
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.frameContainer}>
           <View style={styles.pixelArtContainer}>
             {pixelArt.map((line, rowIndex) => (
@@ -274,6 +279,7 @@ export default function IntroductionStory({ navigation, route }) {
             small
           />
         </View>
+        </ScrollView>
       </Animated.View>
 
       {!gameState.get('hasSeenStory') && (
@@ -292,14 +298,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
   },
-  content: {
+  contentWrapper: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     padding: 20,
     justifyContent: 'center',
   },
   frameContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
   },
   pixelArtContainer: {
