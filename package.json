@@ -6,13 +6,39 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "eslint src App.js index.js --ext .js --max-warnings=0",
+    "format": "prettier --write \"src/engines/**/*.js\" \"src/hooks/**/*.js\" \"src/utils/gameState.js\" \"src/utils/telemetry.js\" \"src/screens/ClinicViewScreen.js\" \"scripts/*.js\" \"docs/art/*.md\" \"docs/qa/*.md\" \"app.json\" \"eas.json\" \".github/workflows/*.yml\"",
+    "format:check": "prettier --check \"src/engines/**/*.js\" \"src/hooks/**/*.js\" \"src/utils/gameState.js\" \"src/utils/telemetry.js\" \"src/screens/ClinicViewScreen.js\" \"scripts/*.js\" \"docs/art/*.md\" \"docs/qa/*.md\" \"app.json\" \"eas.json\" \".github/workflows/*.yml\"",
+    "check:encoding": "node scripts/check-encoding.js",
+    "quality": "npm run check:encoding && npm run lint && npm run format:check && npm run build:web",
+    "build:web": "expo export --platform web",
+    "build:pwa": "expo export --platform web && node scripts/add-pwa-tags.js && cp public/manifest.json dist/ && cp public/sw.js dist/ && cp assets/icon.png dist/icon-192.png && cp assets/icon.png dist/icon-512.png",
+    "deploy": "npm run build:web && npx gh-pages -d dist",
+    "deploy:netlify": "npm run build:web"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~55.0.6",
+    "@react-native-async-storage/async-storage": "^3.0.1",
+    "@react-navigation/native": "^7.1.33",
+    "@react-navigation/stack": "^7.8.5",
     "expo": "~55.0.6",
+    "expo-av": "^16.0.8",
     "expo-status-bar": "~55.0.4",
     "react": "19.2.0",
-    "react-native": "0.83.2"
+    "react-dom": "19.2.0",
+    "react-native": "0.83.2",
+    "react-native-gesture-handler": "^2.30.0",
+    "react-native-reanimated": "^4.2.2",
+    "react-native-safe-area-context": "^5.7.0",
+    "react-native-screens": "^4.24.0",
+    "react-native-web": "^0.21.0"
   },
-  "private": true
+  "devDependencies": {
+    "eslint": "^9.22.0",
+    "gh-pages": "^6.1.1",
+    "prettier": "^3.5.3"
+  },
+  "private": true,
+  "homepage": "https://tu-usuario.github.io/chirohero"
 }
