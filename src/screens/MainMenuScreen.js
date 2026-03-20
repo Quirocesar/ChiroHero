@@ -468,7 +468,12 @@ export default function MainMenuScreen({ navigation }) {
         </Animated.View>
 
         {/* ── Stacked file tabs ──────────────────────────────────────────── */}
-        <View style={styles.tabsRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabsScrollView}
+          contentContainerStyle={styles.tabsRow}
+        >
           <FileTab
             label={`  ${i18n.t('playTutorial')}`}
             color={COLORS.accent}
@@ -493,7 +498,7 @@ export default function MainMenuScreen({ navigation }) {
               navigation.navigate('Achievements');
             }}
           />
-        </View>
+        </ScrollView>
 
         {/* Conditional story button */}
         {hasSave && gameState.get('hasSeenStory') && (
@@ -843,16 +848,17 @@ const styles = StyleSheet.create({
   },
 
   // ── File tabs ──────────────────────────────────────────────────────────────
-  tabsRow: {
+  tabsScrollView: {
     width: CARD_WIDTH,
-    flexDirection: 'row',
-    gap: 6,
-    justifyContent: 'space-between',
     marginBottom: 6,
   },
+  tabsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingRight: 4,
+  },
   fileTab: {
-    flex: 1,
-    minWidth: 0,
+    minWidth: 100,
     borderRadius: 8,
     backgroundColor: COLORS.paperDark,
     // stacked paper look — deeper shadow

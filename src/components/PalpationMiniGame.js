@@ -6,8 +6,12 @@ import PixelButton from './PixelButton';
 import { t } from '../utils/i18n';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SPINE_WIDTH = Math.min(SCREEN_WIDTH * 0.85, 340);
-const SPINE_HEIGHT = 440;
+// Reserve space for zone labels (36px), sensitivity meter (30px), padding (16px), gaps (12px)
+const LABEL_COL_WIDTH = 36;
+const METER_COL_WIDTH = 30;
+const HORIZONTAL_RESERVED = 16 + LABEL_COL_WIDTH + METER_COL_WIDTH + 12;
+const SPINE_WIDTH = Math.min(SCREEN_WIDTH - HORIZONTAL_RESERVED, 300);
+const SPINE_HEIGHT = Math.min(440, SPINE_WIDTH * 1.55); // keep aspect ratio on small screens
 const TOTAL_TIME = 15;
 
 // Zone definitions with Y ranges (normalized 0-1), colors, and vertebrae counts
@@ -811,12 +815,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 3,
   },
 
   // Zone label column (left side)
   zoneLabelColumn: {
-    width: 40,
+    width: LABEL_COL_WIDTH,
     height: SPINE_HEIGHT,
     position: 'relative',
   },
@@ -1002,7 +1006,7 @@ const styles = StyleSheet.create({
 
   // Sensitivity meter
   meterContainer: {
-    width: 34,
+    width: METER_COL_WIDTH,
     height: SPINE_HEIGHT,
     alignItems: 'center',
     justifyContent: 'space-between',
