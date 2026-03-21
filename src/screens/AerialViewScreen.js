@@ -1,356 +1,332 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Animated, Dimensions } from 'react-native';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, Animated, Dimensions, Modal } from 'react-native';
 import { COLORS } from '../utils/theme';
 import PixelText from '../components/PixelText';
 import PixelButton from '../components/PixelButton';
-import PixelCard from '../components/PixelCard';
+import BackHeader from '../components/BackHeader';
 import gameState from '../utils/gameState';
 import soundManager from '../utils/soundManager';
-import { t } from '../utils/i18n';
 
-const { width } = Dimensions.get('window');
-const ROOM_SIZE = Math.min((width - 60) / 2, 150);
+const { width, height } = Dimensions.get('window');
+const TABLE_W = 80;
+const TABLE_H = 50;
+const MAX_TABLES = 6;
+
+// Fixed list of techniques and conditions
+const ALL_TECHNIQUES = ['Ajuste C1', 'Mobilización', 'HVT Lumbar', 'Tracción', 'HVLA'];
+const CONDITIONS = ['Lumbalgia', 'Cervicalgia', 'Dorsalgia', 'Ciática', 'Contractura'];
+
+function getTablePositions(count) {
+  const cols = count <= 3 ? count : Math.ceil(count / 2);
+  const spacing = { x: (width - 32) / cols, y: 90 };
+  return Array.from({ length: count }, (_, i) => ({
+    x: 16 + (i % cols) * spacing.x + spacing.x / 2 - TABLE_W / 2,
+    y: 80 + Math.floor(i / cols) * spacing.y,
+  }));
+}
+
+function generatePatient(id) {
+  const correctTechnique = ALL_TECHNIQUES[Math.floor(Math.random() * ALL_TECHNIQUES.length)];
+  // Build 3 options: always include the correct one
+  const others = ALL_TECHNIQUES.filter(t => t !== correctTechnique);
+  const shuffled = others.sort(() => Math.random() - 0.5).slice(0, 2);
+  const options = [correctTechnique, ...shuffled].sort(() => Math.random() - 0.5);
+  return {
+    id,
+    name: `Paciente ${id}`,
+    condition: CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)],
+    correctTechnique,
+    options, // exactly 3, always includes the correct one
+  };
+}
 
 export default function AerialViewScreen({ navigation }) {
-  const [state, setState] = useState(gameState.state);
-  const chirosCount = gameState.getHiredChirosCount();
-  const [animations] = useState(() =>
-    Array.from({ length: 3 }).map(() => new Animated.Value(0))
+  const unlockedTables = Math.min(gameState.get('unlockedTables') || 2, MAX_TABLES);
+  const positions = getTablePositions(unlockedTables);
+
+  // Each table: { id, x, y, state, patient, patientY (Animated.Value) }
+  const [tables, setTables] = useState(() =>
+    positions.map((pos, i) => ({
+      id: i,
+      ...pos,
+      state: 'empty',
+      patient: null,
+      patientY: new Animated.Value(-60),
+    }))
   );
+  const [selectedTable, setSelectedTable] = useState(null);
+  const [earnings, setEarnings] = useState(0);
+  const patientCounter = useRef(0);
+  const spawnTimer = useRef(null);
+
+  const scheduleSpawn = useCallback(() => {
+    spawnTimer.current = setTimeout(() => {
+      trySpawnPatient();
+      scheduleSpawn();
+    }, 3000 + Math.random() * 4000);
+  }, []);
 
   useEffect(() => {
-    const unsub = gameState.subscribe(setState);
     soundManager.init();
-    soundManager.playClinicMusic();
-
-    // Animate hired chiros
-    animations.forEach((anim, i) => {
-      if (i < chirosCount) {
-        const startAnim = () => {
-          Animated.sequence([
-            Animated.timing(anim, { toValue: 1, duration: 1200, useNativeDriver: true }),
-            Animated.delay(800 + Math.random() * 1500),
-            Animated.timing(anim, { toValue: 0, duration: 800, useNativeDriver: true }),
-            Animated.delay(1000 + Math.random() * 2000),
-          ]).start(() => startAnim());
-        };
-        startAnim();
-      }
-    });
-
+    scheduleSpawn();
     return () => {
-      unsub();
-      soundManager.stopMusic();
-      animations.forEach(anim => anim.stopAnimation());
+      clearTimeout(spawnTimer.current);
     };
   }, []);
 
+  const trySpawnPatient = useCallback(() => {
+    setTables(prev => {
+      const emptyIdx = prev.findIndex(t => t.state === 'empty');
+      if (emptyIdx === -1) return prev;
+
+      patientCounter.current += 1;
+      const patient = generatePatient(patientCounter.current);
+      const tableId = prev[emptyIdx].id;
+
+      // Reset and animate patient Y
+      prev[emptyIdx].patientY.setValue(-60);
+      Animated.timing(prev[emptyIdx].patientY, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start(() => {
+        // Guard: only set 'occupied' if still 'arriving' (not already treated/leaving)
+        setTables(curr => curr.map(t =>
+          t.id === tableId && t.state === 'arriving'
+            ? { ...t, state: 'occupied' }
+            : t
+        ));
+      });
+
+      soundManager.playClick();
+      return prev.map((t, i) =>
+        i === emptyIdx ? { ...t, state: 'arriving', patient } : t
+      );
+    });
+  }, []);
+
+  const handleTableTap = useCallback((table) => {
+    if (table.state !== 'occupied') return;
+    soundManager.playClick();
+    setSelectedTable(table);
+    setTables(prev => prev.map(t =>
+      t.id === table.id ? { ...t, state: 'in_treatment' } : t
+    ));
+  }, []);
+
+  const handleTreatment = useCallback((table, technique) => {
+    soundManager.playCrack();
+    const isCorrect = technique === table.patient.correctTechnique;
+    const earned = isCorrect ? 70 : 55;
+    const rep = isCorrect ? 2 : -0.5;
+
+    setEarnings(prev => prev + earned);
+    // gameState.set() takes a plain object
+    gameState.set({ money: (gameState.get('money') || 0) + earned });
+    gameState.set({
+      reputation: Math.max(0, Math.min(100, (gameState.get('reputation') || 50) + rep)),
+    });
+    soundManager.playSuccess();
+    setSelectedTable(null);
+
+    // Animate patient leaving
+    setTables(prev => prev.map(t => {
+      if (t.id !== table.id) return t;
+      Animated.timing(t.patientY, {
+        toValue: -80,
+        duration: 800,
+        useNativeDriver: true,
+      }).start(() => {
+        setTables(curr => curr.map(tb =>
+          tb.id === table.id ? { ...tb, state: 'empty', patient: null } : tb
+        ));
+      });
+      return { ...t, state: 'leaving' };
+    }));
+  }, []);
+
+  const handleCancelTreatment = useCallback(() => {
+    if (!selectedTable) return;
+    const tableId = selectedTable.id;
+    setSelectedTable(null);
+    setTables(prev => prev.map(t =>
+      t.id === tableId && t.state === 'in_treatment'
+        ? { ...t, state: 'occupied' }
+        : t
+    ));
+  }, [selectedTable]);
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <PixelText size="large" color={COLORS.gold} center glow>
-          🏥 {t('aerialView')}
-        </PixelText>
-        <PixelText size="tiny" color={COLORS.gray} center>
-          {t('manualMode')} / {t('autoMode')}
+      <BackHeader title="SALA ABIERTA" onBack={() => navigation.navigate('ClinicView')} />
+
+      <View style={styles.hud}>
+        <PixelText size="small" color={COLORS.gold}>💰 +${earnings}</PixelText>
+        <PixelText size="tiny" color={COLORS.gray}>
+          {tables.filter(t => t.state !== 'empty').length}/{unlockedTables} activas
         </PixelText>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Building overview */}
-        <View style={styles.building}>
-          {/* Roof */}
-          <View style={styles.roof}>
-            <PixelText size="small" color={COLORS.white} center>
-              {state.clinicName}
-            </PixelText>
-          </View>
-
-          {/* Rooms grid */}
-          <View style={styles.roomsGrid}>
-            {/* Player room */}
-            <View style={[styles.room, styles.playerRoom]}>
-              <View style={[styles.roomLabel, { backgroundColor: COLORS.primary }]}>
-                <PixelText size="tiny" color={COLORS.white}>{t('yourRoom')}</PixelText>
-              </View>
-              <View style={styles.roomInterior}>
-                <View style={styles.doctorIcon}>
-                  <PixelText size="small" center>👨‍⚕️</PixelText>
-                </View>
-                <View style={styles.tableIcon} />
-                <View style={styles.statusDot}>
-                  <View style={[styles.statusLight, { backgroundColor: COLORS.green }]} />
-                </View>
-              </View>
-            </View>
-
-            {/* Hired chiro rooms */}
-            {Array.from({ length: 3 }).map((_, idx) => {
-              const isUnlocked = idx < chirosCount;
-              return (
-                <View key={idx} style={[styles.room, !isUnlocked && styles.lockedRoom]}>
-                  <View style={[styles.roomLabel, { backgroundColor: isUnlocked ? COLORS.secondary : COLORS.grayDark }]}>
-                    <PixelText size="tiny" color={COLORS.white}>
-                      {isUnlocked ? `${t('room')} ${idx + 2}` : '🔒'}
-                    </PixelText>
-                  </View>
-                  {isUnlocked ? (
-                    <View style={styles.roomInterior}>
-                      <Animated.View style={[
-                        styles.doctorIcon,
-                        {
-                          backgroundColor: COLORS.secondaryLight || '#7b52ab',
-                          transform: [{
-                            translateX: animations[idx].interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, ROOM_SIZE * 0.3],
-                            })
-                          }]
-                        }
-                      ]}>
-                        <PixelText size="small" center>👨‍⚕️</PixelText>
-                      </Animated.View>
-                      <View style={styles.tableIcon} />
-                      <Animated.View style={[styles.statusDot, {
-                        opacity: animations[idx].interpolate({
-                          inputRange: [0, 0.5, 1],
-                          outputRange: [1, 0.5, 1],
-                        })
-                      }]}>
-                        <Animated.View style={[styles.statusLight, {
-                          backgroundColor: animations[idx].interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [COLORS.green, COLORS.orange],
-                          })
-                        }]} />
-                      </Animated.View>
-                    </View>
-                  ) : (
-                    <View style={styles.lockedContent}>
-                      <PixelText size="large" color={COLORS.grayDark} center>🔒</PixelText>
-                    </View>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-
-          {/* Reception area */}
-          <View style={styles.reception}>
-            <View style={styles.receptionDesk}>
-              <PixelText size="tiny" color={COLORS.white} center>🖥️ Reception</PixelText>
-            </View>
-            {/* Waiting chairs */}
-            <View style={styles.waitingArea}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <View key={i} style={styles.chair}>
-                  <PixelText size="tiny" center>🪑</PixelText>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Entrance */}
-          <View style={styles.entrance}>
-            <View style={styles.door} />
-            <PixelText size="tiny" color={COLORS.gray} center>🚪</PixelText>
-          </View>
+      <View style={styles.floor}>
+        <View style={styles.door}>
+          <PixelText size="tiny" color={COLORS.gray}>🚪 ENTRADA</PixelText>
         </View>
 
-        {/* Info card */}
-        <PixelCard color={COLORS.dark} borderColor={COLORS.primary}>
-          <PixelText size="small" color={COLORS.accent} center>
-            {t('aerialView')} - {t('clinic')}
-          </PixelText>
-          <View style={styles.infoRow}>
-            <PixelText size="tiny" color={COLORS.gray}>
-              {t('staff')}: {chirosCount}/3
-            </PixelText>
-            <PixelText size="tiny" color={COLORS.gold}>
-              {t('level')}: {state.clinicLevel}
-            </PixelText>
-          </View>
-          <PixelText size="tiny" color={COLORS.grayDark} style={styles.infoDesc}>
-            {chirosCount > 0
-              ? `${chirosCount} chiropractors treating patients automatically, generating passive income.`
-              : 'Hire chiropractors in the Shop to expand your clinic.'}
-          </PixelText>
-        </PixelCard>
-      </ScrollView>
+        {tables.map(table => (
+          <TouchableOpacity
+            key={table.id}
+            style={[
+              styles.table,
+              { left: table.x, top: table.y },
+              table.state === 'occupied' && styles.tableOccupied,
+              table.state === 'in_treatment' && styles.tableInTreatment,
+              table.state === 'arriving' && styles.tableArriving,
+            ]}
+            onPress={() => handleTableTap(table)}
+            activeOpacity={table.state === 'occupied' ? 0.7 : 1}
+          >
+            <PixelText size="tiny" color={COLORS.grayLight} center>🛏</PixelText>
+            {table.patient && (
+              <Animated.View
+                style={[styles.patientSprite, { transform: [{ translateY: table.patientY }] }]}
+              >
+                <PixelText size="small" center>🧑</PixelText>
+              </Animated.View>
+            )}
+            {table.state === 'occupied' && (
+              <View style={styles.tapHint}>
+                <PixelText size="tiny" color={COLORS.primary}>👆</PixelText>
+              </View>
+            )}
+          </TouchableOpacity>
+        ))}
 
-      <View style={styles.footer}>
-        <PixelButton
-          title={`👁️ ${t('manualMode')}`}
-          color={COLORS.primary}
-          onPress={() => {
-            soundManager.stopMusic();
-            navigation.replace('ClinicView');
-          }}
-        />
+        <View style={styles.waitingArea}>
+          <PixelText size="tiny" color={COLORS.gray}>ESPERA</PixelText>
+          <View style={{ flexDirection: 'row', gap: 2 }}>
+            {[...Array(3)].map((_, i) => <PixelText key={i} size="small">🪑</PixelText>)}
+          </View>
+        </View>
       </View>
+
+      {/* Treatment popup — covers full screen */}
+      <Modal
+        visible={!!selectedTable}
+        transparent
+        animationType="slide"
+        onRequestClose={handleCancelTreatment}
+      >
+        <View style={styles.popupBackdrop}>
+          <View style={styles.popup}>
+            {selectedTable && (
+              <>
+                <PixelText size="small" color={COLORS.white} center>
+                  {selectedTable.patient?.name}
+                </PixelText>
+                <PixelText size="tiny" color={COLORS.gray} center>
+                  {selectedTable.patient?.condition}
+                </PixelText>
+                <PixelText size="tiny" color={COLORS.grayLight} center style={{ marginTop: 8 }}>
+                  Elegir técnica:
+                </PixelText>
+                {/* options always contains the correctTechnique — see generatePatient() */}
+                {selectedTable.patient.options.map(tech => (
+                  <TouchableOpacity
+                    key={tech}
+                    style={styles.techniqueBtn}
+                    onPress={() => handleTreatment(selectedTable, tech)}
+                  >
+                    <PixelText size="small" color={COLORS.white}>{tech}</PixelText>
+                  </TouchableOpacity>
+                ))}
+                <PixelButton
+                  title="CANCELAR"
+                  color={COLORS.secondary}
+                  onPress={handleCancelTreatment}
+                  small
+                />
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  header: {
-    paddingTop: 40,
-    paddingBottom: 10,
-    paddingHorizontal: 16,
-    backgroundColor: COLORS.dark,
-    borderBottomWidth: 4,
-    borderColor: COLORS.gold,
-  },
-  scrollContent: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  building: {
-    width: Math.min(width - 32, 340),
-    backgroundColor: COLORS.bgLight,
-    borderWidth: 4,
-    borderColor: COLORS.grayDark,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  roof: {
-    backgroundColor: COLORS.dark,
-    paddingVertical: 6,
-    borderBottomWidth: 3,
-    borderColor: COLORS.accent,
-  },
-  roomsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 6,
-    gap: 6,
-    justifyContent: 'center',
-  },
-  room: {
-    width: ROOM_SIZE,
-    height: ROOM_SIZE * 0.85,
-    backgroundColor: '#4a6580',
-    borderWidth: 2,
-    borderColor: COLORS.dark,
-    overflow: 'hidden',
-  },
-  playerRoom: {
-    borderColor: COLORS.primary,
-    borderWidth: 3,
-  },
-  lockedRoom: {
-    backgroundColor: '#1a1a1a',
-    borderColor: '#333',
-  },
-  roomLabel: {
-    paddingVertical: 2,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderColor: 'rgba(0,0,0,0.3)',
-  },
-  roomInterior: {
-    flex: 1,
-    position: 'relative',
-    padding: 4,
-  },
-  doctorIcon: {
-    position: 'absolute',
-    top: 8,
-    left: 6,
-    width: 22,
-    height: 22,
-    backgroundColor: COLORS.skin,
-    borderWidth: 1,
-    borderColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tableIcon: {
-    position: 'absolute',
-    bottom: 6,
-    right: 6,
-    width: 18,
-    height: 40,
-    backgroundColor: '#3d2817',
-    borderWidth: 1,
-    borderColor: '#000',
-  },
-  statusDot: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-  },
-  statusLight: {
-    width: 8,
-    height: 8,
-    borderWidth: 1,
-    borderColor: '#fff',
-  },
-  lockedContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  reception: {
-    flexDirection: 'row',
-    padding: 6,
-    gap: 6,
-    borderTopWidth: 2,
-    borderColor: COLORS.grayDark,
-    backgroundColor: '#2a3a4a',
-  },
-  receptionDesk: {
-    width: 80,
-    height: 36,
-    backgroundColor: COLORS.dark,
-    borderWidth: 2,
-    borderColor: COLORS.accent,
-    justifyContent: 'center',
-  },
-  waitingArea: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chair: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  entrance: {
-    paddingVertical: 4,
-    alignItems: 'center',
-    backgroundColor: COLORS.dark,
-    borderTopWidth: 2,
-    borderColor: COLORS.grayDark,
-  },
-  door: {
-    width: 30,
-    height: 4,
-    backgroundColor: COLORS.gold,
-    marginBottom: 2,
-  },
-  infoRow: {
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
+  hud: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: COLORS.deskDark,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border + '30',
   },
-  infoDesc: {
-    marginTop: 4,
-    lineHeight: 16,
+  floor: { flex: 1, position: 'relative' },
+  door: {
+    position: 'absolute',
+    top: 8,
+    alignSelf: 'center',
+    left: width / 2 - 50,
+    backgroundColor: COLORS.bgDark,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border + '30',
   },
-  footer: {
+  table: {
+    position: 'absolute',
+    width: TABLE_W,
+    height: TABLE_H,
+    backgroundColor: COLORS.desk,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: COLORS.deskLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tableOccupied: { borderColor: COLORS.primary },
+  tableInTreatment: { borderColor: COLORS.accent },
+  tableArriving: { borderColor: COLORS.gold },
+  patientSprite: { position: 'absolute', top: -20 },
+  tapHint: { position: 'absolute', bottom: -16 },
+  waitingArea: {
+    position: 'absolute',
+    right: 8,
+    top: 40,
+    backgroundColor: COLORS.bgMedium,
+    borderRadius: 8,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border + '30',
+    alignItems: 'center',
+    gap: 4,
+  },
+  popupBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  popup: {
+    backgroundColor: COLORS.deskDark,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderTopWidth: 2,
+    borderTopColor: COLORS.primary + '60',
+    padding: 20,
+    paddingBottom: 36,
+    gap: 8,
+  },
+  techniqueBtn: {
+    backgroundColor: COLORS.bgDark,
+    borderRadius: 8,
     padding: 12,
-    backgroundColor: COLORS.dark,
-    borderTopWidth: 3,
-    borderColor: COLORS.grayDark,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '40',
+    alignItems: 'center',
   },
 });

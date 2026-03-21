@@ -432,6 +432,43 @@ const TAB_ACCENTS = {
           </View>
         </View>
 
+        {/* Sala Abierta — table unlock section */}
+        {gameState.get('clinicMode') === 'salaAbierta' && (
+          <View style={styles.section}>
+            <PixelText size="medium" color={COLORS.gold}>🛏 CAMILLAS</PixelText>
+            {[
+              { table: 3, cost: 500 },
+              { table: 4, cost: 1200 },
+              { table: 5, cost: 2500 },
+              { table: 6, cost: 5000 },
+            ].map(({ table, cost }) => {
+              const unlocked = (gameState.get('unlockedTables') || 2) >= table;
+              const canAfford = (gameState.get('money') || 0) >= cost;
+              return (
+                <View key={table} style={styles.upgradeRow}>
+                  <PixelText size="small" color={unlocked ? COLORS.accent : COLORS.white}>
+                    {unlocked ? '✓' : '🔒'} Camilla {table}
+                  </PixelText>
+                  {!unlocked && (
+                    <PixelButton
+                      title={`$${cost}`}
+                      color={canAfford ? COLORS.primary : COLORS.grayDark}
+                      disabled={!canAfford}
+                      onPress={() => {
+                        if (!canAfford) return;
+                        gameState.set({ money: (gameState.get('money') || 0) - cost });
+                        gameState.set({ unlockedTables: table });
+                        soundManager.playSuccess();
+                      }}
+                      small
+                    />
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         {/* Tabs */}
         <View style={styles.tabs}>
           {TABS.map((tabItem) => (
@@ -621,6 +658,9 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.accent,
     borderStyle: 'dashed',
   },
+  // Sala Abierta upgrades
+  section: { marginBottom: 20 },
+  upgradeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 4 },
   // Back
   backSection: {
     marginTop: 16,
