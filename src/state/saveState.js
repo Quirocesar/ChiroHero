@@ -24,7 +24,9 @@ export const DEFAULT_STATE = {
   hasGraduatedWalmer: false,
   walmerDaysCompleted: 0,
   walmerPatientsAdjusted: 0,
-  clinicMode: null, // 'open' | 'closed'
+  clinicMode: 'salaCerrada', // 'salaCerrada' | 'salaAbierta'
+  unlockedTables: 2,       // Sala Abierta: number of active tables (2-6)
+  tutorialStep: 0,         // 0=not started, 1-8=in progress, 9=completed
 
   // Game Mode
   gameMode: 'relaxed', // arcade, challenge, relaxed
