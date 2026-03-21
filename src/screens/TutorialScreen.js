@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Animated, Dimensions } from 'react-native';
 import { COLORS } from '../utils/theme';
+import BackHeader from '../components/BackHeader';
 import PixelText from '../components/PixelText';
 import PixelButton from '../components/PixelButton';
 import PixelCard from '../components/PixelCard';
@@ -112,6 +113,7 @@ export default function TutorialScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <BackHeader title="TUTORIAL" />
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>

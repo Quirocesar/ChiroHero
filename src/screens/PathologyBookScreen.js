@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Animated } from 'react-native';
 import { COLORS } from '../utils/theme';
+import BackHeader from '../components/BackHeader';
 import PixelButton from '../components/PixelButton';
 import PixelText from '../components/PixelText';
 import PixelCard from '../components/PixelCard';
@@ -27,7 +28,9 @@ export default function PathologyBookScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <View style={styles.container}>
+      <BackHeader title="MANUAL DE PATOLOGÍAS" />
+      <ScrollView contentContainerStyle={styles.content}>
       {/* Book cover */}
       <View style={styles.bookCover}>
         <View style={styles.bookBinding}>
@@ -163,7 +166,8 @@ export default function PathologyBookScreen({ navigation }) {
         onPress={() => navigation.goBack()}
         style={styles.backButton}
       />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 

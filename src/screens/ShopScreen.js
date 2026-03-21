@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { COLORS } from '../utils/theme';
+import BackHeader from '../components/BackHeader';
 import PixelButton from '../components/PixelButton';
 import PixelText from '../components/PixelText';
 import PixelCard from '../components/PixelCard';
@@ -410,68 +411,71 @@ const TAB_ACCENTS = {
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerDecor}>
-          <View style={[styles.decorLine, { backgroundColor: accent }]} />
-          <PixelText size="large" color={accent} glow>
-            {t('shop')}
-          </PixelText>
-          <View style={[styles.decorLine, { backgroundColor: accent }]} />
-        </View>
-        <View style={styles.moneyDisplay}>
-          <View style={[styles.moneyBadge, { borderColor: COLORS.gold }]}>
-            <PixelText size="medium" color={COLORS.gold} glow>
-              ${state.money}
+    <View style={styles.container}>
+      <BackHeader title="TIENDA" />
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerDecor}>
+            <View style={[styles.decorLine, { backgroundColor: accent }]} />
+            <PixelText size="large" color={accent} glow>
+              {t('shop')}
             </PixelText>
+            <View style={[styles.decorLine, { backgroundColor: accent }]} />
+          </View>
+          <View style={styles.moneyDisplay}>
+            <View style={[styles.moneyBadge, { borderColor: COLORS.gold }]}>
+              <PixelText size="medium" color={COLORS.gold} glow>
+                ${state.money}
+              </PixelText>
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* Tabs */}
-      <View style={styles.tabs}>
-        {TABS.map((tabItem) => (
+        {/* Tabs */}
+        <View style={styles.tabs}>
+          {TABS.map((tabItem) => (
+            <PixelButton
+              key={tabItem.id}
+              title={`${tabItem.icon} ${t(tabItem.labelKey)}`}
+              color={tab === tabItem.id ? TAB_ACCENTS[tabItem.id] : COLORS.dark}
+              onPress={() => { setTab(tabItem.id); soundManager.playClick(); }}
+              small
+              style={[
+                styles.tab,
+                tab === tabItem.id && styles.tabActive,
+                tab === tabItem.id && { borderBottomColor: TAB_ACCENTS[tabItem.id], borderBottomWidth: 2 },
+              ]}
+            />
+          ))}
+        </View>
+
+        {/* Tab indicator bar */}
+        <View style={[styles.tabIndicator, { backgroundColor: accent }]} />
+
+        {/* Tab Content */}
+        <View style={styles.tabContent}>
+          {tab === 'tools' && renderToolsTab()}
+          {tab === 'clinic' && renderClinicTab()}
+          {tab === 'skills' && renderSkillsTab()}
+          {tab === 'staff' && renderStaffTab()}
+          {tab === 'expand' && renderExpandTab()}
+          {tab === 'decor' && renderDecorTab()}
+        </View>
+
+        {/* Back button */}
+        <View style={styles.backSection}>
+          <View style={[styles.decorLine, { backgroundColor: COLORS.grayDark }]} />
           <PixelButton
-            key={tabItem.id}
-            title={`${tabItem.icon} ${t(tabItem.labelKey)}`}
-            color={tab === tabItem.id ? TAB_ACCENTS[tabItem.id] : COLORS.dark}
-            onPress={() => { setTab(tabItem.id); soundManager.playClick(); }}
-            small
-            style={[
-              styles.tab,
-              tab === tabItem.id && styles.tabActive,
-              tab === tabItem.id && { borderBottomColor: TAB_ACCENTS[tabItem.id], borderBottomWidth: 2 },
-            ]}
+            title={t('back')}
+            icon={'\u2190'}
+            color={COLORS.dark}
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
           />
-        ))}
-      </View>
-
-      {/* Tab indicator bar */}
-      <View style={[styles.tabIndicator, { backgroundColor: accent }]} />
-
-      {/* Tab Content */}
-      <View style={styles.tabContent}>
-        {tab === 'tools' && renderToolsTab()}
-        {tab === 'clinic' && renderClinicTab()}
-        {tab === 'skills' && renderSkillsTab()}
-        {tab === 'staff' && renderStaffTab()}
-        {tab === 'expand' && renderExpandTab()}
-        {tab === 'decor' && renderDecorTab()}
-      </View>
-
-      {/* Back button */}
-      <View style={styles.backSection}>
-        <View style={[styles.decorLine, { backgroundColor: COLORS.grayDark }]} />
-        <PixelButton
-          title={t('back')}
-          icon={'\u2190'}
-          color={COLORS.dark}
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        />
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

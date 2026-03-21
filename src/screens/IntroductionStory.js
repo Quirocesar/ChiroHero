@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, Dimensions, ScrollView, Image } from 'react-native';
 import { COLORS, lighten, darken } from '../utils/theme';
+import BackHeader from '../components/BackHeader';
 import PixelButton from '../components/PixelButton';
 import PixelText from '../components/PixelText';
 import gameState from '../utils/gameState';
@@ -203,6 +204,7 @@ export default function IntroductionStory({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <BackHeader />
       <Animated.View
         style={[
           styles.contentWrapper,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Animated } from 'react-native';
 import { COLORS } from '../utils/theme';
+import BackHeader from '../components/BackHeader';
 import PixelButton from '../components/PixelButton';
 import PixelText from '../components/PixelText';
 import PixelCard from '../components/PixelCard';
@@ -71,129 +72,132 @@ export default function EventsScreen({ navigation }) {
   });
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <PixelText size="large" color={COLORS.gold} center glow>
-        ✈️ {t('eventsTitle')}
-      </PixelText>
-      <PixelText size="small" color={COLORS.gray} center style={styles.subtitle}>
-        {t('eventsSubtitle')}
-      </PixelText>
+    <View style={styles.container}>
+      <BackHeader title="EVENTOS" />
+      <ScrollView contentContainerStyle={styles.content}>
+        <PixelText size="large" color={COLORS.gold} center glow>
+          ✈️ {t('eventsTitle')}
+        </PixelText>
+        <PixelText size="small" color={COLORS.gray} center style={styles.subtitle}>
+          {t('eventsSubtitle')}
+        </PixelText>
 
-      {/* Player stats */}
-      <PixelCard color={COLORS.dark} borderColor={COLORS.accent}>
-        <View style={styles.statsRow}>
-          <PixelText size="small" color={COLORS.gold}>💰 ${state.money}</PixelText>
-          <PixelText size="small" color={COLORS.accent}>⭐ {state.reputation}</PixelText>
-          <PixelText size="small" color={COLORS.green}>Lv.{state.skillLevel}</PixelText>
-        </View>
-      </PixelCard>
-
-      {/* Event in progress */}
-      {activeEvent && !eventResult && (
-        <PixelCard color={COLORS.bgMedium} borderColor={COLORS.gold}>
-          <Animated.View style={{ transform: [{ translateY: planeBounce }] }}>
-            <PixelText size="xlarge" color={COLORS.gold} center>✈️</PixelText>
-          </Animated.View>
-          <PixelText size="medium" color={COLORS.gold} center>
-            {t('traveling')}
-          </PixelText>
-          <PixelText size="small" color={COLORS.white} center style={styles.travelText}>
-            {activeEvent.name}
-          </PixelText>
-          <PixelText size="tiny" color={COLORS.gray} center>
-            {activeEvent.description}
-          </PixelText>
-        </PixelCard>
-      )}
-
-      {/* Event result */}
-      {eventResult && (
-        <PixelCard color="#0a2a0a" borderColor={COLORS.green}>
-          <PixelText size="medium" color={COLORS.green} center glow>
-            🏆 {t('eventComplete')}
-          </PixelText>
-          <PixelText size="normal" color={COLORS.gold} center style={styles.travelText}>
-            {eventResult.name}
-          </PixelText>
-          <View style={styles.rewardBox}>
-            <View style={styles.rewardRow}>
-              <PixelText size="small" color={COLORS.white}>{t('gain')}:</PixelText>
-              <PixelText size="small" color={COLORS.gold}>${eventResult.reward.money}</PixelText>
-            </View>
-            <View style={styles.rewardRow}>
-              <PixelText size="small" color={COLORS.white}>{t('reputation')}:</PixelText>
-              <PixelText size="small" color={COLORS.accent}>+{eventResult.reward.reputation}</PixelText>
-            </View>
-            <View style={styles.rewardRow}>
-              <PixelText size="small" color={COLORS.white}>{t('experience')}:</PixelText>
-              <PixelText size="small" color={COLORS.green}>+{eventResult.reward.xp} XP</PixelText>
-            </View>
+        {/* Player stats */}
+        <PixelCard color={COLORS.dark} borderColor={COLORS.accent}>
+          <View style={styles.statsRow}>
+            <PixelText size="small" color={COLORS.gold}>💰 ${state.money}</PixelText>
+            <PixelText size="small" color={COLORS.accent}>⭐ {state.reputation}</PixelText>
+            <PixelText size="small" color={COLORS.green}>Lv.{state.skillLevel}</PixelText>
           </View>
-          <PixelButton
-            title={t('great')}
-            icon="✓"
-            color={COLORS.green}
-            onPress={closeResult}
-          />
         </PixelCard>
-      )}
 
-      {/* Event list */}
-      {!activeEvent && TRAVEL_EVENTS.map(event => {
-        const completed = (state.eventsCompleted || []).includes(event.id);
-        const hasRep = state.reputation >= event.minReputation;
-        const canAfford = state.money >= event.cost;
-
-        return (
-          <PixelCard
-            key={event.id}
-            color={completed ? '#0a2a0a' : COLORS.dark}
-            borderColor={completed ? COLORS.green : hasRep ? COLORS.gold : COLORS.grayDark}
-          >
-            <View style={styles.eventHeader}>
-              <PixelText size="normal" color={completed ? COLORS.green : hasRep ? COLORS.gold : COLORS.gray}>
-                {event.name}
-              </PixelText>
-              {completed && <PixelText size="small" color={COLORS.green}>✓</PixelText>}
-            </View>
-            <PixelText size="tiny" color={COLORS.gray} style={styles.desc}>
-              {event.description}
+        {/* Event in progress */}
+        {activeEvent && !eventResult && (
+          <PixelCard color={COLORS.bgMedium} borderColor={COLORS.gold}>
+            <Animated.View style={{ transform: [{ translateY: planeBounce }] }}>
+              <PixelText size="xlarge" color={COLORS.gold} center>✈️</PixelText>
+            </Animated.View>
+            <PixelText size="medium" color={COLORS.gold} center>
+              {t('traveling')}
             </PixelText>
-            <View style={styles.eventInfo}>
-              <PixelText size="tiny" color={canAfford ? COLORS.gold : COLORS.red}>
-                {t('cost')}: ${event.cost}
-              </PixelText>
-              <PixelText size="tiny" color={hasRep ? COLORS.green : COLORS.red}>
-                {t('minRep')}: ⭐{event.minReputation}
-              </PixelText>
-            </View>
-            <View style={styles.eventReward}>
-              <PixelText size="tiny" color={COLORS.accent}>
-                {t('reward')}: ${event.reward.money} | +{event.reward.reputation} ⭐ | +{event.reward.xp} XP
-              </PixelText>
-            </View>
-            {!completed && (
-              <PixelButton
-                title={!hasRep ? t('needMoreRep') : !canAfford ? t('noFunds') : t('travel')}
-                icon={hasRep && canAfford ? '✈️' : '🔒'}
-                color={hasRep && canAfford ? COLORS.gold : COLORS.grayDark}
-                onPress={() => handleTravel(event)}
-                disabled={!hasRep || !canAfford}
-                small
-              />
-            )}
+            <PixelText size="small" color={COLORS.white} center style={styles.travelText}>
+              {activeEvent.name}
+            </PixelText>
+            <PixelText size="tiny" color={COLORS.gray} center>
+              {activeEvent.description}
+            </PixelText>
           </PixelCard>
-        );
-      })}
+        )}
 
-      <PixelButton
-        title={t('back')}
-        icon="←"
-        color={COLORS.dark}
-        onPress={() => { soundManager.stopMusic(); navigation.goBack(); }}
-        style={styles.backButton}
-      />
-    </ScrollView>
+        {/* Event result */}
+        {eventResult && (
+          <PixelCard color="#0a2a0a" borderColor={COLORS.green}>
+            <PixelText size="medium" color={COLORS.green} center glow>
+              🏆 {t('eventComplete')}
+            </PixelText>
+            <PixelText size="normal" color={COLORS.gold} center style={styles.travelText}>
+              {eventResult.name}
+            </PixelText>
+            <View style={styles.rewardBox}>
+              <View style={styles.rewardRow}>
+                <PixelText size="small" color={COLORS.white}>{t('gain')}:</PixelText>
+                <PixelText size="small" color={COLORS.gold}>${eventResult.reward.money}</PixelText>
+              </View>
+              <View style={styles.rewardRow}>
+                <PixelText size="small" color={COLORS.white}>{t('reputation')}:</PixelText>
+                <PixelText size="small" color={COLORS.accent}>+{eventResult.reward.reputation}</PixelText>
+              </View>
+              <View style={styles.rewardRow}>
+                <PixelText size="small" color={COLORS.white}>{t('experience')}:</PixelText>
+                <PixelText size="small" color={COLORS.green}>+{eventResult.reward.xp} XP</PixelText>
+              </View>
+            </View>
+            <PixelButton
+              title={t('great')}
+              icon="✓"
+              color={COLORS.green}
+              onPress={closeResult}
+            />
+          </PixelCard>
+        )}
+
+        {/* Event list */}
+        {!activeEvent && TRAVEL_EVENTS.map(event => {
+          const completed = (state.eventsCompleted || []).includes(event.id);
+          const hasRep = state.reputation >= event.minReputation;
+          const canAfford = state.money >= event.cost;
+
+          return (
+            <PixelCard
+              key={event.id}
+              color={completed ? '#0a2a0a' : COLORS.dark}
+              borderColor={completed ? COLORS.green : hasRep ? COLORS.gold : COLORS.grayDark}
+            >
+              <View style={styles.eventHeader}>
+                <PixelText size="normal" color={completed ? COLORS.green : hasRep ? COLORS.gold : COLORS.gray}>
+                  {event.name}
+                </PixelText>
+                {completed && <PixelText size="small" color={COLORS.green}>✓</PixelText>}
+              </View>
+              <PixelText size="tiny" color={COLORS.gray} style={styles.desc}>
+                {event.description}
+              </PixelText>
+              <View style={styles.eventInfo}>
+                <PixelText size="tiny" color={canAfford ? COLORS.gold : COLORS.red}>
+                  {t('cost')}: ${event.cost}
+                </PixelText>
+                <PixelText size="tiny" color={hasRep ? COLORS.green : COLORS.red}>
+                  {t('minRep')}: ⭐{event.minReputation}
+                </PixelText>
+              </View>
+              <View style={styles.eventReward}>
+                <PixelText size="tiny" color={COLORS.accent}>
+                  {t('reward')}: ${event.reward.money} | +{event.reward.reputation} ⭐ | +{event.reward.xp} XP
+                </PixelText>
+              </View>
+              {!completed && (
+                <PixelButton
+                  title={!hasRep ? t('needMoreRep') : !canAfford ? t('noFunds') : t('travel')}
+                  icon={hasRep && canAfford ? '✈️' : '🔒'}
+                  color={hasRep && canAfford ? COLORS.gold : COLORS.grayDark}
+                  onPress={() => handleTravel(event)}
+                  disabled={!hasRep || !canAfford}
+                  small
+                />
+              )}
+            </PixelCard>
+          );
+        })}
+
+        <PixelButton
+          title={t('back')}
+          icon="←"
+          color={COLORS.dark}
+          onPress={() => { soundManager.stopMusic(); navigation.goBack(); }}
+          style={styles.backButton}
+        />
+      </ScrollView>
+    </View>
   );
 }
 
