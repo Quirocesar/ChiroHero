@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Animated } from 'react-native';
+import { View, StyleSheet, ScrollView, Animated, TouchableOpacity } from 'react-native';
 import { COLORS } from '../utils/theme';
 import PixelButton from '../components/PixelButton';
 import PixelText from '../components/PixelText';
@@ -38,6 +38,8 @@ export default function ConsultationScreen({ route, navigation }) {
     const state = gameState.getState();
     return state?.purchasedTools?.includes('xray') || false;
   }, []);
+
+  const [showManualModal, setShowManualModal] = useState(false);
 
   // Check if neuro test should trigger
   const needsNeuroTest = useMemo(() => {
@@ -394,6 +396,15 @@ export default function ConsultationScreen({ route, navigation }) {
               onPress={handleTreat}
             />
             <PixelButton
+              title="TRATAR MANUALMENTE"
+              icon="🖐"
+              color={COLORS.accent}
+              onPress={() => {
+                soundManager.playClick();
+                setShowManualModal(true);
+              }}
+            />
+            <PixelButton
               title={t('referSpecialist')}
               icon="🏥"
               color={COLORS.orange}
@@ -418,7 +429,53 @@ export default function ConsultationScreen({ route, navigation }) {
         )}
       </View>
     </ScrollView>
-    {/* Modal will go here as a sibling in Task 7 */}
+    {showManualModal && (
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalSheet}>
+          <PixelText size="medium" color={COLORS.white} center style={{ marginBottom: 16 }}>
+            ELEGIR MINIJUEGO
+          </PixelText>
+
+          {[
+            { icon: '🖐', label: 'Palpación Espinal', phase: 'palpation' },
+            { icon: '🦴', label: 'Radiografía', phase: 'xray', requiresTool: true },
+            { icon: '🧠', label: 'Test Neurológico', phase: 'neuro' },
+          ].map((opt) => {
+            const locked = opt.requiresTool && !hasXray;
+            return (
+              <TouchableOpacity
+                key={opt.phase}
+                style={[styles.miniGameOption, locked && { opacity: 0.4 }]}
+                onPress={() => {
+                  if (locked) return;
+                  setShowManualModal(false);
+                  soundManager.playClick();
+                  setPhase(opt.phase); // use existing phase switching — NOT navigation.navigate
+                }}
+                disabled={locked}
+              >
+                <PixelText size="large">{opt.icon}</PixelText>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <PixelText size="small" color={locked ? COLORS.gray : COLORS.white}>
+                    {opt.label}
+                  </PixelText>
+                  {locked && (
+                    <PixelText size="tiny" color={COLORS.gray}>🔒 Requiere equipo de RX</PixelText>
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+
+          <PixelButton
+            title="CANCELAR"
+            color={COLORS.secondary}
+            onPress={() => setShowManualModal(false)}
+            small
+          />
+        </View>
+      </View>
+    )}
     </View>
   );
 }
@@ -513,5 +570,30 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 10,
     marginBottom: 30,
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: COLORS.deskDark,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderTopWidth: 2,
+    borderColor: COLORS.accent + '60',
+    padding: 20,
+    paddingBottom: 36,
+    gap: 8,
+  },
+  miniGameOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.bgDark,
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border + '30',
   },
 });
