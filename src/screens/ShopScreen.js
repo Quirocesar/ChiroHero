@@ -18,7 +18,16 @@ const TAB_ACCENTS = {
   staff: COLORS.green,
   expand: COLORS.gold,
   decor: COLORS.pink,
-  };
+};
+
+const TABS = [
+  { id: 'tools',  icon: '🔧', labelKey: 'tabTools' },
+  { id: 'clinic', icon: '🏥', labelKey: 'tabClinic' },
+  { id: 'skills', icon: '📚', labelKey: 'tabSkills' },
+  { id: 'staff',  icon: '👥', labelKey: 'tabStaff' },
+  { id: 'expand', icon: '🏗️', labelKey: 'tabExpand' },
+  { id: 'decor',  icon: '🎨', labelKey: 'tabDecor' },
+];
 
   export default function ShopScreen({ navigation }) {
   const [state, setState] = useState(gameState.state);
@@ -409,6 +418,75 @@ const TAB_ACCENTS = {
       })}
     </>
   );
+
+  const renderDecorTab = () => {
+    if (!DECORATION_UPGRADES || DECORATION_UPGRADES.length === 0) {
+      return (
+        <PixelCard borderColor={TAB_ACCENTS.decor} color={COLORS.bgMedium}>
+          <PixelText size="normal" color={TAB_ACCENTS.decor} glow style={{ textAlign: 'center', marginBottom: 8 }}>
+            🎨 Decoración
+          </PixelText>
+          <PixelText size="small" color={COLORS.gray} style={{ textAlign: 'center' }}>
+            Próximamente
+          </PixelText>
+        </PixelCard>
+      );
+    }
+
+    return (
+      <>
+        <PixelCard borderColor={TAB_ACCENTS.decor} color={COLORS.bgMedium}>
+          <PixelText size="normal" color={TAB_ACCENTS.decor} glow>
+            🎨 {t('tabDecor')}
+          </PixelText>
+          <PixelText size="tiny" color={COLORS.gray} style={styles.desc}>
+            {t('decorDesc') || 'Personaliza tu clínica con decoración especial.'}
+          </PixelText>
+        </PixelCard>
+
+        {DECORATION_UPGRADES.map((item) => {
+          const owned = state.decorations && state.decorations[item.id];
+          return (
+            <PixelCard
+              key={item.id}
+              color={owned ? COLORS.accentDark + '20' : COLORS.bgLight}
+              borderColor={owned ? COLORS.green : TAB_ACCENTS.decor}
+            >
+              <View style={styles.itemRow}>
+                <PixelText size="large" color={owned ? COLORS.green : COLORS.white}>
+                  🎨
+                </PixelText>
+                <View style={styles.itemInfo}>
+                  <View style={styles.itemHeader}>
+                    <PixelText size="normal" color={owned ? COLORS.green : COLORS.white}>
+                      {item.name}
+                    </PixelText>
+                    {owned ? (
+                      <PixelText size="small" color={COLORS.green}>{t('purchased')}</PixelText>
+                    ) : (
+                      <PixelText size="small" color={COLORS.gold} glow>${item.cost}</PixelText>
+                    )}
+                  </View>
+                  <PixelText size="tiny" color={COLORS.gray} style={styles.desc}>
+                    {item.description}
+                  </PixelText>
+                </View>
+              </View>
+              {!owned && (
+                <PixelButton
+                  title={state.money >= item.cost ? t('buy') : t('notEnoughMoney')}
+                  color={state.money >= item.cost ? COLORS.green : COLORS.grayDark}
+                  onPress={() => handleDecorPurchase(item.id, item.cost)}
+                  disabled={state.money < item.cost}
+                  small
+                />
+              )}
+            </PixelCard>
+          );
+        })}
+      </>
+    );
+  };
 
   return (
     <View style={styles.container}>
