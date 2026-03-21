@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, Animated, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Animated, ScrollView, Pressable, Platform } from 'react-native';
 import { COLORS } from '../utils/theme';
 import BookingsModal from '../components/BookingsModal';
 import AchievementNotification from '../components/AchievementNotification';
@@ -1260,7 +1260,13 @@ export default function ClinicViewScreen({ navigation, route }) {
       </View>
 
       {/* Action bar */}
-      <ScrollView style={styles.actionBarWrap} showsVerticalScrollIndicator={false} bounces={false}>
+      <ScrollView
+        style={[styles.actionBarWrap, { flex: 1 }, Platform.OS === 'web' && { overflow: 'auto' }]}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        bounces={false}
+      >
         <ActionBar
           dayStarted={dayStarted}
           dayEnded={dayEnded}

@@ -617,6 +617,7 @@ export default function TreatmentScreen({ route, navigation }) {
             </View>
             <ScrollView
               horizontal
+              nestedScrollEnabled={true}
               showsHorizontalScrollIndicator={false}
               style={styles.toolScroll}
               contentContainerStyle={styles.toolScrollContent}
@@ -660,6 +661,7 @@ export default function TreatmentScreen({ route, navigation }) {
             </View>
             <ScrollView
               horizontal
+              nestedScrollEnabled={true}
               showsHorizontalScrollIndicator={false}
               style={styles.toolScroll}
               contentContainerStyle={styles.toolScrollContent}
@@ -750,7 +752,8 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingTop: 40,
     gap: 10,
-    paddingBottom: 30,
+    flexGrow: 1,
+    paddingBottom: 40,
   },
 
   statusBar: {

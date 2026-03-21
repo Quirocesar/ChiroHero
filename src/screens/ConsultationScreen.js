@@ -181,7 +181,8 @@ export default function ConsultationScreen({ route, navigation }) {
   // ── Main consultation view ──
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <View style={styles.container}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {/* Patient header */}
       <PixelCard color={COLORS.deskDark} borderColor={patient.isPremium ? COLORS.gold : COLORS.accent}>
         <View style={styles.patientHeader}>
@@ -417,6 +418,8 @@ export default function ConsultationScreen({ route, navigation }) {
         )}
       </View>
     </ScrollView>
+    {/* Modal will go here as a sibling in Task 7 */}
+    </View>
   );
 }
 
@@ -429,7 +432,8 @@ const styles = StyleSheet.create({
     padding: 14,
     paddingTop: 42,
     gap: 12,
-    paddingBottom: 30,
+    flexGrow: 1,
+    paddingBottom: 40,
   },
   patientHeader: {
     flexDirection: 'row',

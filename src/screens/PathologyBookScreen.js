@@ -180,7 +180,8 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingTop: 40,
     gap: 8,
-    paddingBottom: 30,
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   bookCover: {
     flexDirection: 'row',
