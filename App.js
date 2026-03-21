@@ -20,6 +20,7 @@ import IntroVideoScreen from './src/screens/IntroVideoScreen';
 import TutorialScreen from './src/screens/TutorialScreen';
 import AchievementsScreen from './src/screens/AchievementsScreen';
 import GameModeSelector from './src/screens/GameModeSelector';
+import ClinicModeSelectorScreen from './src/screens/ClinicModeSelectorScreen';
 import IntroductionStory from './src/screens/IntroductionStory';
 import AppErrorBoundary from './src/components/AppErrorBoundary';
 import gameState from './src/utils/gameState';
@@ -242,6 +243,17 @@ export default function App() {
                 transitionSpec: {
                   open: { animation: 'timing', config: { duration: 400 } },
                   close: { animation: 'timing', config: { duration: 350 } },
+                },
+              }}
+            />
+            <Stack.Screen
+              name="ClinicModeSelector"
+              component={ClinicModeSelectorScreen}
+              options={{
+                cardStyleInterpolator: forSlideFromRight,
+                transitionSpec: {
+                  open: { animation: 'timing', config: { duration: 300 } },
+                  close: { animation: 'timing', config: { duration: 250 } },
                 },
               }}
             />

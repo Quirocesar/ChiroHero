@@ -103,7 +103,7 @@ export default function GameModeSelector({ navigation }) {
       treatmentMode: gameState.get('treatmentMode') || 'auto',
     });
     await gameState.save();
-    navigation.navigate('ClinicView');
+    navigation.navigate('ClinicModeSelector');
   };
 
   const handleBack = () => {
