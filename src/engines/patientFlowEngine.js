@@ -133,7 +133,7 @@ export function resolveAutoTreatment({
   };
   const qualityMultiplier = qualityMultiplierMap[qualityTier] || 0.95;
 
-  const socialMultiplier = patient.socialPaymentMultiplier || 1;
+  const socialMultiplier = patient.paymentMultiplier ?? patient.socialPaymentMultiplier ?? 1;
   const normalizedPatientBase =
     patient?.payment && !patient?.isPremium
       ? patient.payment / Math.max(0.1, socialMultiplier)
@@ -142,7 +142,8 @@ export function resolveAutoTreatment({
   let income = Math.round(basePayment * socialMultiplier * qualityMultiplier);
 
   const baseRepDelta = patient.isPremium ? 10 : 2;
-  let repDelta = Math.round(baseRepDelta * (patient.socialRepMultiplier || 1));
+  const repMultiplier = patient.repMultiplier ?? patient.socialRepMultiplier ?? 1;
+  let repDelta = Math.round(baseRepDelta * repMultiplier);
   if (qualityTier === 'Bad') {
     repDelta -= Math.max(2, Math.round(baseRepDelta * 1.5));
   }
@@ -156,7 +157,7 @@ export function resolveAutoTreatment({
     if (detected) {
       result = 'referred';
       income = Math.round(basePayment * 0.3);
-      repDelta = Math.max(3, Math.round(5 * (patient.socialRepMultiplier || 1)));
+      repDelta = Math.max(3, Math.round(5 * repMultiplier));
     } else {
       result = 'wrong_treat';
       income = 0;

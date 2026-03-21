@@ -1,5 +1,7 @@
 ﻿// Global Game State Manager
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import telemetry from './telemetry';
+import TELEMETRY_EVENTS from './telemetryEvents';
 import {
   computeDailyDemand as computeDailyDemandEngine,
   computeDailyCosts as computeDailyCostsEngine,
@@ -16,366 +18,42 @@ import {
   getWeightedSocialStats as getWeightedSocialStatsEngine,
   resolveAutoTreatment as resolveAutoTreatmentEngine,
 } from '../engines/patientFlowEngine';
+import { CLINIC_LEVEL_BENEFITS, getClinicBenefits } from '../state/clinicProgression';
+import { ECONOMY_PROFILES } from '../state/economyProfiles';
+import {
+  REPUTATION_TITLES,
+  RANK_TIERS,
+  getCurrentRank,
+  getReputationLevel,
+  getReputationTitle,
+} from '../state/reputation';
+import {
+  SEASON_LENGTH_DAYS,
+  STREAK_BONUSES,
+  getSeasonNumber,
+  getStreakBonus,
+} from '../state/seasonProgression';
+import {
+  DEFAULT_STATE,
+  SAVE_KEYS,
+  SAVE_SCHEMA_VERSION,
+  normalizeLoadedState,
+} from '../state/saveState';
 
-const SAVE_SCHEMA_VERSION = 2;
-
-const SAVE_KEYS = {
-  1: '@chirohero_save_1',
-  2: '@chirohero_save_2',
-  3: '@chirohero_save_3',
+export {
+  CLINIC_LEVEL_BENEFITS,
+  getClinicBenefits,
+  ECONOMY_PROFILES,
+  REPUTATION_TITLES,
+  RANK_TIERS,
+  getCurrentRank,
+  getReputationLevel,
+  getReputationTitle,
+  SEASON_LENGTH_DAYS,
+  STREAK_BONUSES,
+  getSeasonNumber,
+  getStreakBonus,
 };
-
-export const CLINIC_LEVEL_BENEFITS = {
-  1: { maxPatients: 2, incomeBonus: 0, patientBonus: 0, referralChance: 0.05 },
-  2: { maxPatients: 3, incomeBonus: 0.05, patientBonus: 0, referralChance: 0.08 },
-  3: { maxPatients: 4, incomeBonus: 0.1, patientBonus: 1, referralChance: 0.1 },
-  4: { maxPatients: 4, incomeBonus: 0.15, patientBonus: 1, referralChance: 0.12 },
-  5: { maxPatients: 5, incomeBonus: 0.2, patientBonus: 2, referralChance: 0.15 },
-  6: { maxPatients: 5, incomeBonus: 0.25, patientBonus: 2, referralChance: 0.18 },
-  7: { maxPatients: 6, incomeBonus: 0.3, patientBonus: 3, referralChance: 0.2 },
-  8: { maxPatients: 6, incomeBonus: 0.35, patientBonus: 3, referralChance: 0.22 },
-  9: { maxPatients: 7, incomeBonus: 0.4, patientBonus: 4, referralChance: 0.25 },
-  10: { maxPatients: 8, incomeBonus: 0.5, patientBonus: 5, referralChance: 0.3 },
-};
-
-export const REPUTATION_TITLES = {
-  1: { title: 'Aprendiz', minRep: 0, maxPatientsBonus: 0, tipBonus: 0 },
-  2: { title: 'Principiante', minRep: 50, maxPatientsBonus: 0, tipBonus: 0.05 },
-  3: { title: 'Competente', minRep: 150, maxPatientsBonus: 0, tipBonus: 0.1 },
-  4: { title: 'Experto', minRep: 300, maxPatientsBonus: 1, tipBonus: 0.15 },
-  5: { title: 'Avanzado', minRep: 500, maxPatientsBonus: 1, tipBonus: 0.2 },
-  6: { title: 'Maestro', minRep: 750, maxPatientsBonus: 2, tipBonus: 0.25 },
-  7: { title: 'Experto Senior', minRep: 1000, maxPatientsBonus: 2, tipBonus: 0.3 },
-  8: { title: 'Licenciado', minRep: 1500, maxPatientsBonus: 3, tipBonus: 0.35 },
-  9: { title: 'Doctor', minRep: 2000, maxPatientsBonus: 3, tipBonus: 0.4 },
-  10: { title: 'Doctor Senior', minRep: 3000, maxPatientsBonus: 4, tipBonus: 0.45 },
-  15: { title: 'Especialista', minRep: 5000, maxPatientsBonus: 5, tipBonus: 0.5 },
-  20: { title: 'Cirujano', minRep: 7500, maxPatientsBonus: 6, tipBonus: 0.55 },
-  25: { title: 'Jefe de Clinica', minRep: 10000, maxPatientsBonus: 7, tipBonus: 0.6 },
-  30: { title: 'Director', minRep: 15000, maxPatientsBonus: 8, tipBonus: 0.65 },
-  35: { title: 'Consul', minRep: 20000, maxPatientsBonus: 9, tipBonus: 0.7 },
-  40: { title: 'Ministro', minRep: 30000, maxPatientsBonus: 10, tipBonus: 0.75 },
-  45: { title: 'Legado', minRep: 50000, maxPatientsBonus: 12, tipBonus: 0.8 },
-  50: { title: 'Leyenda', minRep: 100000, maxPatientsBonus: 15, tipBonus: 1.0 },
-};
-
-export const RANK_TIERS = {
-  Bronze: { minRep: 0, maxRep: 500, color: '#cd7f32' },
-  Silver: { minRep: 501, maxRep: 1500, color: '#c0c0c0' },
-  Gold: { minRep: 1501, maxRep: 4000, color: '#ffd700' },
-  Platinum: { minRep: 4001, maxRep: 10000, color: '#e5e4e2' },
-  Diamond: { minRep: 10001, maxRep: Infinity, color: '#b9f2ff' },
-};
-
-export const SEASON_LENGTH_DAYS = 30;
-
-export const STREAK_BONUSES = {
-  3: { moneyBonus: 0.1, repBonus: 1 },
-  7: { moneyBonus: 0.2, repBonus: 2 },
-  14: { moneyBonus: 0.3, repBonus: 3 },
-  30: { moneyBonus: 0.5, repBonus: 5 },
-};
-
-export const ECONOMY_PROFILES = {
-  casual: {
-    label: 'Casual',
-    fixedCostMultiplier: 0.8,
-    variableCostMultiplier: 0.82,
-    maintenanceMultiplier: 0.85,
-    staffMultiplier: 0.9,
-    taxRateMultiplier: 0.75,
-    monthlyRentMultiplier: 0.8,
-    demandModifier: 1,
-    debtInterestMultiplier: 0.7,
-    rescueThreshold: -320,
-    rescueTargetCash: 220,
-    rescueInterestMultiplier: 1.04,
-    rewardMultiplier: 1.2,
-    safeCashBuffer: 200,
-  },
-  normal: {
-    label: 'Normal',
-    fixedCostMultiplier: 1,
-    variableCostMultiplier: 1,
-    maintenanceMultiplier: 1,
-    staffMultiplier: 1,
-    taxRateMultiplier: 1,
-    monthlyRentMultiplier: 1,
-    demandModifier: 0,
-    debtInterestMultiplier: 1,
-    rescueThreshold: -200,
-    rescueTargetCash: 100,
-    rescueInterestMultiplier: 1.18,
-    rewardMultiplier: 1,
-    safeCashBuffer: 300,
-  },
-  hardcore: {
-    label: 'Hardcore',
-    fixedCostMultiplier: 1.28,
-    variableCostMultiplier: 1.22,
-    maintenanceMultiplier: 1.25,
-    staffMultiplier: 1.2,
-    taxRateMultiplier: 1.25,
-    monthlyRentMultiplier: 1.2,
-    demandModifier: -1,
-    debtInterestMultiplier: 1.45,
-    rescueThreshold: -120,
-    rescueTargetCash: 70,
-    rescueInterestMultiplier: 1.38,
-    rewardMultiplier: 0.85,
-    safeCashBuffer: 450,
-  },
-};
-
-export function getReputationLevel(rep) {
-  let level = 1;
-  for (let lvl in REPUTATION_TITLES) {
-    if (rep >= REPUTATION_TITLES[lvl].minRep) {
-      level = parseInt(lvl);
-    }
-  }
-  return level;
-}
-
-export function getReputationTitle(rep) {
-  const level = getReputationLevel(rep);
-  return REPUTATION_TITLES[level]?.title || 'Aprendiz';
-}
-
-export function getCurrentRank(rep) {
-  for (let rank in RANK_TIERS) {
-    if (rep >= RANK_TIERS[rank].minRep && rep <= RANK_TIERS[rank].maxRep) {
-      return { rank, ...RANK_TIERS[rank] };
-    }
-  }
-  return { rank: 'Bronze', ...RANK_TIERS.Bronze };
-}
-
-export function getSeasonNumber(currentDay) {
-  return Math.ceil(currentDay / SEASON_LENGTH_DAYS);
-}
-
-export function getStreakBonus(streak) {
-  let bonus = { moneyBonus: 0, repBonus: 0 };
-  for (let days in STREAK_BONUSES) {
-    if (streak >= parseInt(days)) {
-      bonus = STREAK_BONUSES[days];
-    }
-  }
-  return bonus;
-}
-
-export function getClinicBenefits(level) {
-  return CLINIC_LEVEL_BENEFITS[level] || CLINIC_LEVEL_BENEFITS[1];
-}
-
-const DEFAULT_STATE = {
-  saveSchemaVersion: SAVE_SCHEMA_VERSION,
-  // Player
-  playerName: 'Dr. Quiro',
-  money: 500,
-  reputation: 0,
-  reputationLevel: 1,
-  skillLevel: 1,
-  experience: 0,
-  treatmentMode: 'auto', // auto | hybrid | manual
-  hasCompletedTutorial: false,
-  hasSeenStory: false,
-  hasGraduatedWalmer: false,
-  walmerDaysCompleted: 0,
-  walmerPatientsAdjusted: 0,
-  clinicMode: null, // 'open' | 'closed'
-
-  // Game Mode
-  gameMode: 'relaxed', // arcade, challenge, relaxed
-
-  // Progression
-  currentDay: 1,
-  currentWeek: 1,
-  currentMonth: 1,
-  currentSeason: 1,
-  totalPatientsHealed: 0,
-  totalPatientsReferred: 0,
-  totalMoneyEarned: 0,
-
-  // Arcade mode stats
-  arcadeHighScore: 0,
-  arcadePatientsTreated: 0,
-  arcadeCurrentSpeed: 1,
-
-  // Challenge mode stats
-  challengeMistakes: 0,
-  challengeRepLost: 0,
-
-  // Relaxed mode stats
-  relaxedPatientsTreated: 0,
-
-  // Clinic
-  clinicLevel: 1,
-  consultPrice: 100,
-  monthlyTaxRate: 0.15,
-  economyProfile: 'normal',
-  clinicName: 'Clinica QuiroHero',
-
-  // Daily Streak
-  dailyStreak: 0,
-  lastPlayedDate: null,
-  streakBonusClaimed: false,
-
-  // Season
-  seasonPatients: [],
-  seasonStartDay: 1,
-
-  // Referred patients system
-  referredPatients: [],
-  referredToday: [],
-
-  // Daily Missions
-  dailyMissions: [],
-  lastMissionReset: null,
-
-  // Upgrades purchased
-  upgrades: {
-    // Tools
-    activator: false, // Activador quiropractico
-    dropTable: false, // Mesa de caida
-    flexionTable: false, // Mesa de flexion-distraccion
-    ultrasound: false, // Ultrasonido
-    tens: false, // TENS electrico
-    massageGun: false, // Pistola de masaje
-
-    // Clinic
-    waitingRoom: 1, // Nivel sala de espera
-    decoration: 1, // Decoracion
-    lighting: 1, // Iluminacion
-
-    // Skills
-    cervicalTechnique: 1, // Tecnica cervical
-    thoracicTechnique: 1, // Tecnica toracica
-    lumbarTechnique: 1, // Tecnica lumbar
-    palpation: 1, // Palpacion
-    diagnostics: 1, // Diagnostico
-  },
-
-  // Decorations (Passive Buffs)
-  decorations: {
-    plants: false, // patience
-    neonSign: false, // combo duration
-    premiumBed: false, // base pay
-  },
-
-  // Staff
-  staff: {
-    whatsappManager: false,
-    appointmentAssistant: false,
-    chiroAssistant: false,
-    multipleCA: false,
-    hireChiro1: false,
-    hireChiro2: false,
-    hireChiro3: false,
-  },
-
-  // Language
-  language: 'es',
-
-  // Returning patients tracking
-  satisfiedPatients: [], // Names of patients who were happy
-
-  // Events unlocked
-  eventsCompleted: [],
-  premiumPatientsServed: 0,
-
-  // Daily tracking
-  patientsToday: [],
-  dayComplete: false,
-  dailyMistakes: 0,
-  flyersDoneToday: false,
-  flyerReach: 0,
-  paidAdvertisingLevel: 0,
-  dailyDemandModifier: 0,
-  dailyCostFlatModifier: 0,
-  activeDailyEconomicEvent: null,
-  dailyEconomicEventHistory: [],
-  lastMonthlyChargeDay: 0,
-  monthProfitAccum: 0,
-  dailyFixedCosts: 120,
-  dailyVariableCosts: 18,
-  loanPrincipal: 0,
-  loanInstallment: 0,
-  loanDaysRemaining: 0,
-  debtTier: 'none',
-  pendingDailyReward: 0,
-
-  // Papers Please-inspired systems
-  citations: 0, // Total citations received
-  citationsToday: 0, // Citations this day (first 2 are warnings)
-  totalFines: 0, // Total fines paid
-  clinicDebt: 0, // Unpaid bills accumulate as debt
-  dayEarnings: 0, // Earnings for current day
-  newspaperHeadlines: [], // Recent headlines about your clinic
-  returningPatients: [], // Patients who will return (name, condition, day to return)
-
-  // Statistics
-  stats: {
-    perfectAdjustments: 0,
-    fastestTreatment: null,
-    longestStreak: 0,
-    currentStreak: 0,
-    highestCombo: 0,
-    perfectDays: 0,
-  },
-
-  // Achievements
-  achievements: [],
-
-  // Appointment History
-  appointmentHistory: [],
-};
-
-function normalizeLoadedState(parsed = {}) {
-  const source = parsed || {};
-  const sourceVersion = Number(source.saveSchemaVersion || 1);
-
-  const normalized = {
-    ...DEFAULT_STATE,
-    ...source,
-    upgrades: { ...DEFAULT_STATE.upgrades, ...(source.upgrades || {}) },
-    decorations: { ...DEFAULT_STATE.decorations, ...(source.decorations || {}) },
-    staff: { ...DEFAULT_STATE.staff, ...(source.staff || {}) },
-    stats: { ...DEFAULT_STATE.stats, ...(source.stats || {}) },
-    referredPatients: source.referredPatients || [],
-    referredToday: source.referredToday || [],
-    dailyMissions: source.dailyMissions || [],
-    seasonPatients: source.seasonPatients || [],
-    appointmentHistory: source.appointmentHistory || [],
-    patientsToday: source.patientsToday || [],
-    dailyEconomicEventHistory: source.dailyEconomicEventHistory || [],
-    newspaperHeadlines: source.newspaperHeadlines || [],
-    returningPatients: source.returningPatients || [],
-    satisfiedPatients: source.satisfiedPatients || [],
-    achievements: source.achievements || [],
-    saveSchemaVersion: SAVE_SCHEMA_VERSION,
-  };
-
-  if (sourceVersion < 2) {
-    if (!normalized.treatmentMode) normalized.treatmentMode = 'auto';
-    if (typeof normalized.dailyDemandModifier !== 'number') normalized.dailyDemandModifier = 0;
-    if (typeof normalized.dailyCostFlatModifier !== 'number') normalized.dailyCostFlatModifier = 0;
-    if (typeof normalized.pendingDailyReward !== 'number') normalized.pendingDailyReward = 0;
-    if (typeof normalized.dailyFixedCosts !== 'number') normalized.dailyFixedCosts = 120;
-    if (typeof normalized.dailyVariableCosts !== 'number') normalized.dailyVariableCosts = 18;
-    if (typeof normalized.monthlyTaxRate !== 'number') normalized.monthlyTaxRate = 0.15;
-    if (!normalized.economyProfile) normalized.economyProfile = 'normal';
-  }
-
-  normalized.loanPrincipal = Math.max(0, Math.round(normalized.loanPrincipal || 0));
-  normalized.loanInstallment = Math.max(0, Math.round(normalized.loanInstallment || 0));
-  normalized.loanDaysRemaining = Math.max(0, Math.round(normalized.loanDaysRemaining || 0));
-  normalized.debtTier = getDebtTierForPrincipalEngine(normalized.loanPrincipal);
-  normalized.reputationLevel = getReputationLevel(normalized.reputation || 0);
-
-  return normalized;
-}
 
 class GameState {
   constructor() {
@@ -1419,6 +1097,16 @@ class GameState {
       loanPrincipal: rescuePlan.newLoanPrincipal,
       loanInstallment: rescuePlan.newInstallment,
       loanDaysRemaining: rescuePlan.days,
+      debtTier: rescuePlan.debtTier,
+    });
+
+    telemetry.logEvent(TELEMETRY_EVENTS.RESCUE_APPLIED, {
+      day: this.state.currentDay || 1,
+      rescueThreshold: rescuePlan.rescueThreshold,
+      targetCash: rescuePlan.targetCash,
+      bailoutNeeded: rescuePlan.bailoutNeeded,
+      loanPrincipal: rescuePlan.newLoanPrincipal,
+      loanInstallment: rescuePlan.newInstallment,
       debtTier: rescuePlan.debtTier,
     });
 

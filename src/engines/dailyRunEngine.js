@@ -1,29 +1,55 @@
-﻿export function buildDailyObjectives({ netIncome = 0, dayMetrics = {} } = {}) {
+﻿function getBaseTargetsByDay(day = 1) {
+  if (day <= 7) return { profitability: 50, precision: 70, satisfaction: 35 };
+  if (day <= 21) return { profitability: 80, precision: 75, satisfaction: 40 };
+  if (day <= 30) return { profitability: 110, precision: 78, satisfaction: 45 };
+  return { profitability: 140, precision: 80, satisfaction: 50 };
+}
+
+function getProfileTargetMultiplier(economyProfile = 'normal') {
+  if (economyProfile === 'casual') return 0.9;
+  if (economyProfile === 'hardcore') return 1.15;
+  return 1;
+}
+
+export function buildDailyObjectives({
+  netIncome = 0,
+  dayMetrics = {},
+  day = 1,
+  economyProfile = 'normal',
+} = {}) {
   const treatedCount = Math.max(1, dayMetrics.treated || 0);
   const precisionRatio = ((dayMetrics.good || 0) + (dayMetrics.regular || 0)) / treatedCount;
   const satisfactionRatio = (dayMetrics.good || 0) / treatedCount;
+  const baseTargets = getBaseTargetsByDay(day);
+  const profileMultiplier = getProfileTargetMultiplier(economyProfile);
+
+  const profitabilityTarget = Math.round(baseTargets.profitability * profileMultiplier);
+  const precisionTarget = Math.round(baseTargets.precision * profileMultiplier);
+  const satisfactionTarget = Math.round(baseTargets.satisfaction * profileMultiplier);
+  const precisionCurrent = Math.round(precisionRatio * 100);
+  const satisfactionCurrent = Math.round(satisfactionRatio * 100);
 
   return [
     {
       id: 'profitability',
       label: 'Rentabilidad',
       current: Math.round(netIncome),
-      target: 80,
-      completed: netIncome >= 80,
+      target: profitabilityTarget,
+      completed: netIncome >= profitabilityTarget,
     },
     {
       id: 'precision',
       label: 'Precision clinica',
-      current: Math.round(precisionRatio * 100),
-      target: 75,
-      completed: precisionRatio >= 0.75,
+      current: precisionCurrent,
+      target: precisionTarget,
+      completed: precisionCurrent >= precisionTarget,
     },
     {
       id: 'satisfaction',
       label: 'Satisfaccion',
-      current: Math.round(satisfactionRatio * 100),
-      target: 40,
-      completed: satisfactionRatio >= 0.4,
+      current: satisfactionCurrent,
+      target: satisfactionTarget,
+      completed: satisfactionCurrent >= satisfactionTarget,
     },
   ];
 }

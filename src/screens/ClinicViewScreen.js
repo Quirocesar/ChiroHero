@@ -22,12 +22,14 @@ import {
   SEASON_LENGTH_DAYS,
 } from '../utils/gameState';
 import telemetry from '../utils/telemetry';
+import TELEMETRY_EVENTS from '../utils/telemetryEvents';
 import useClinicEconomyPreview from '../hooks/useClinicEconomyPreview';
 import {
   buildDailyObjectives,
   calculatePerformanceReward,
   buildDailyMemorableMoments,
 } from '../engines/dailyRunEngine';
+import { resolveMonthlyCloseIfNeeded } from '../engines/dayCloseEngine';
 
 // Sub-components
 import ClinicHud from '../components/ClinicHud';
@@ -38,7 +40,7 @@ import ActionBar from '../components/ActionBar';
 
 const { width } = Dimensions.get('window');
 
-// â”€â”€ FloatingMoneyParticles (kept in orchestrator â€” manages ParticleSystem) â”€â”€
+// FloatingMoneyParticles (kept in orchestrator - manages ParticleSystem)
 function FloatingMoneyParticles({ active, amount }) {
   const [showParticles, setShowParticles] = useState(false);
 
@@ -58,7 +60,7 @@ function FloatingMoneyParticles({ active, amount }) {
   );
 }
 
-// â”€â”€ Time of day helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Time of day helper
 function getTimeOfDay(gameHour) {
   if (gameHour >= 6 && gameHour < 9) return 'dawn';
   if (gameHour >= 9 && gameHour < 18) return 'day';
@@ -66,12 +68,12 @@ function getTimeOfDay(gameHour) {
   return 'night';
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// ClinicViewScreen â€” Orchestrator
+// -------------------------------------------------------------------
+// ClinicViewScreen - Orchestrator
 // All state + logic lives here; sub-components are presentational.
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// -------------------------------------------------------------------
 export default function ClinicViewScreen({ navigation, route }) {
-  // â”€â”€ State (ALL preserved exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // State
   const [state, setState] = useState(gameState.state);
   const [patients, setPatients] = useState([]);
   const [currentPatientIndex, setCurrentPatientIndex] = useState(0);
@@ -104,6 +106,8 @@ export default function ClinicViewScreen({ navigation, route }) {
   const [dayTimeRemaining, setDayTimeRemaining] = useState(0);
   const dayTimerRef = useRef(null);
   const flyerTimerRef = useRef(null);
+  const startDayLockRef = useRef(false);
+  const endDayLockRef = useRef(false);
   const [reputationInfo, setReputationInfo] = useState({
     title: 'Aprendiz',
     rank: { rank: 'Bronze' },
@@ -153,7 +157,7 @@ export default function ClinicViewScreen({ navigation, route }) {
     priceGuidance,
   } = useClinicEconomyPreview(state, isWalmerTutorial);
 
-  // â”€â”€ Effects (ALL preserved exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Effects
 
   useEffect(() => {
     if (pendingAchievements.length > 0 && !showAchievement) {
@@ -301,7 +305,7 @@ export default function ClinicViewScreen({ navigation, route }) {
     };
   }, [showFlyerMinigame]);
 
-  // â”€â”€ Callbacks (ALL preserved exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Callbacks
 
   const animatePatientEntry = useCallback(() => {
     walkAnim.setValue(-100);
@@ -490,6 +494,12 @@ export default function ClinicViewScreen({ navigation, route }) {
   }, []);
 
   const startDay = useCallback(() => {
+    if (startDayLockRef.current || dayStarted) {
+      return;
+    }
+    startDayLockRef.current = true;
+    endDayLockRef.current = false;
+
     const newPatients = [];
     setTutorialAdjustedToday(0);
     setDayMetrics({ treated: 0, good: 0, regular: 0, bad: 0, qualityTotal: 0 });
@@ -506,7 +516,7 @@ export default function ClinicViewScreen({ navigation, route }) {
     }
 
     const maxPatients = getTargetPatientsForDay();
-    telemetry.logEvent('day_start', {
+    telemetry.logEvent(TELEMETRY_EVENTS.DAY_START, {
       day: gameState.get('currentDay') || 1,
       profile: gameState.get('economyProfile') || 'normal',
       treatmentMode: gameState.get('treatmentMode') || 'auto',
@@ -648,6 +658,7 @@ export default function ClinicViewScreen({ navigation, route }) {
         setPendingBookings([]);
       }
     }
+    startDayLockRef.current = false;
   }, [animatePatientEntry, getTargetPatientsForDay, isWalmerTutorial, state.walmerDaysCompleted]);
 
   const handlePatientComplete = useCallback(
@@ -660,7 +671,7 @@ export default function ClinicViewScreen({ navigation, route }) {
 
       const streakInfo = gameState.getStreakInfo();
       const repInfo = gameState.getReputationInfo();
-      const socialRepMultiplier = patient?.socialRepMultiplier || 1;
+      const socialRepMultiplier = patient?.repMultiplier ?? patient?.socialRepMultiplier ?? 1;
       const socialClass = patient?.socialClass || 'middle';
       const hasQualityScore = typeof resolvedPayload.qualityScore === 'number';
       const fallbackTierFromResult =
@@ -800,7 +811,32 @@ export default function ClinicViewScreen({ navigation, route }) {
       });
 
       setDayEarnings((prev) => prev + earnings);
-      telemetry.logEvent('patient_resolved', {
+      const visitScore = Math.max(0, Math.min(100, Math.round(qualityScore || 0)));
+      const visitOutcome = result;
+      const currentPatientsToday = gameState.get('patientsToday') || [];
+      const returnChance = patient?.returnChance ?? 0.3;
+      const visitRecord = {
+        id: patient?.id || `visit_${Date.now()}`,
+        name: patient?.fullName || patient?.firstName || 'Paciente',
+        condition: patient?.condition?.name || '',
+        score: visitScore,
+        outcome: visitOutcome,
+        payment: Math.round(earnings || 0),
+        socialClass,
+        returnChance,
+      };
+      gameState.set({
+        patientsToday: [...currentPatientsToday, visitRecord],
+      });
+      gameState.addAppointmentRecord({
+        patientName: visitRecord.name,
+        condition: visitRecord.condition,
+        payment: visitRecord.payment,
+        outcome: visitRecord.outcome,
+        score: visitRecord.score,
+      });
+
+      telemetry.logEvent(TELEMETRY_EVENTS.PATIENT_RESOLVED, {
         day: gameState.get('currentDay') || 1,
         patientId: patient?.id || null,
         result,
@@ -846,9 +882,10 @@ export default function ClinicViewScreen({ navigation, route }) {
   );
 
   const endDay = useCallback(() => {
-    if (dayEnded) {
+    if (dayEnded || endDayLockRef.current) {
       return;
     }
+    endDayLockRef.current = true;
     setDayEnded(true);
     if (dayTimerRef.current) clearInterval(dayTimerRef.current);
 
@@ -883,6 +920,8 @@ export default function ClinicViewScreen({ navigation, route }) {
     const dailyObjectives = buildDailyObjectives({
       netIncome: report.netIncome,
       dayMetrics,
+      day: gameState.get('currentDay') || 1,
+      economyProfile: gameState.get('economyProfile') || 'normal',
     });
 
     // Daily reward loop: encourages good execution and consistency.
@@ -898,61 +937,14 @@ export default function ClinicViewScreen({ navigation, route }) {
       gameState.addDailyReward(rewardAdjusted);
     }
 
-    let finalReport = { ...report };
-    const currentDay = gameState.get('currentDay') || 1;
-    if (currentDay % 30 === 0 && gameState.get('lastMonthlyChargeDay') !== currentDay) {
-      const economyCfg = gameState.getEconomyProfileConfig();
-      const rent = Math.round(
-        (400 + (gameState.get('clinicLevel') || 1) * 80) * (economyCfg.monthlyRentMultiplier || 1)
-      );
-      const taxRate = gameState.getEffectiveMonthlyTaxRate();
-      const monthProfit = Math.max(0, gameState.get('monthProfitAccum') || 0);
-      const taxes = Math.round(monthProfit * taxRate);
-      const total = rent + taxes;
-      gameState.applyForcedCost(total);
-      gameState.set({
-        lastMonthlyChargeDay: currentDay,
-        monthProfitAccum: 0,
-      });
-      setMonthlyChargeInfo({ rent, taxes, total, monthProfit });
+    const closeResolution = resolveMonthlyCloseIfNeeded({
+      gameState,
+      report,
+    });
+    const finalReport = closeResolution.finalReport;
+    if (closeResolution.monthlyChargeInfo) {
+      setMonthlyChargeInfo(closeResolution.monthlyChargeInfo);
       setShowMonthlyChargeModal(true);
-
-      // Keep end-of-day report coherent with monthly close charges.
-      let balanceAfterMonthly = Math.round((finalReport.newBalance || 0) - total);
-      let postMonthlyRescue = null;
-      const rescueThreshold = gameState.getEffectiveRescueThreshold(
-        gameState.getEconomyProfileConfig(),
-        gameState.getDebtTierForPrincipal(gameState.get('loanPrincipal') || 0)
-      );
-      if (balanceAfterMonthly < rescueThreshold) {
-        postMonthlyRescue = gameState.applyDebtRescue();
-        if (postMonthlyRescue?.applied) {
-          balanceAfterMonthly = Math.round(gameState.get('money') || balanceAfterMonthly);
-        }
-      }
-
-      const monthlyFactors = [
-        ...(Array.isArray(finalReport.topFactors) ? finalReport.topFactors : []),
-        { label: 'Alquiler mensual', amount: -Math.round(rent) },
-        { label: 'Impuestos mensuales', amount: -Math.round(taxes) },
-      ];
-      if (postMonthlyRescue?.applied) {
-        monthlyFactors.push({
-          label: 'Rescate mensual',
-          amount: Math.round(postMonthlyRescue.bailoutNeeded || 0),
-        });
-      }
-
-      finalReport = {
-        ...finalReport,
-        newBalance: balanceAfterMonthly,
-        isInDebt: balanceAfterMonthly < 0,
-        topFactors: monthlyFactors
-          .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
-          .slice(0, 3),
-        monthlyCharge: { rent, taxes, total, monthProfit },
-        postMonthlyRescue,
-      };
     }
 
     const memorableMoments = buildDailyMemorableMoments({
@@ -973,7 +965,7 @@ export default function ClinicViewScreen({ navigation, route }) {
       completedObjectivesCount,
       memorableMoments,
     });
-    telemetry.logEvent('day_end', {
+    telemetry.logEvent(TELEMETRY_EVENTS.DAY_END, {
       day: gameState.get('currentDay') || 1,
       treated: dayMetrics.treated,
       netIncome: finalReport.netIncome,
@@ -987,7 +979,9 @@ export default function ClinicViewScreen({ navigation, route }) {
     // Schedule returning patients from today's happy patients
     const patientsToday = gameState.get('patientsToday') || [];
     patientsToday.forEach((p) => {
-      if (p.score >= 70 && Math.random() < 0.3) {
+      const returnChance =
+        typeof p.returnChance === 'number' ? Math.max(0, Math.min(1, p.returnChance)) : 0.3;
+      if (p.score >= 70 && Math.random() < returnChance) {
         gameState.scheduleReturningPatient(p.name, p.condition, Math.floor(Math.random() * 5) + 3);
       }
     });
@@ -1028,6 +1022,8 @@ export default function ClinicViewScreen({ navigation, route }) {
   const nextDay = useCallback(() => {
     if (dayTimerRef.current) clearInterval(dayTimerRef.current);
     gameState.advanceDay();
+    startDayLockRef.current = false;
+    endDayLockRef.current = false;
     setDayStarted(false);
     setDayEnded(false);
     setShowEndOfDayReport(false);
@@ -1213,9 +1209,9 @@ export default function ClinicViewScreen({ navigation, route }) {
     navigatePatientFlow(currentPatient);
   }, [currentPatient, navigatePatientFlow]);
 
-  // â”€â”€ Derived values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Derived values
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Render
   return (
     <View style={styles.container}>
       <FloatingMoneyParticles active={moneyParticlesActive} amount={previousEarnings} />
@@ -1420,7 +1416,7 @@ export default function ClinicViewScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* â”€â”€ Modals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Modals */}
       <BookingsModal
         visible={showBookingsModal}
         bookings={pendingBookings}

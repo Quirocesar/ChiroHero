@@ -20,6 +20,7 @@
 - [ ] Cobro mensual (alquiler + impuestos) ocurre una vez por ciclo.
 - [ ] Balance del reporte coincide con caja final.
 - [ ] Prestamo y cuota se actualizan correctamente.
+- [ ] `npm run qa:economy` genera simulaciones 30/60/90 para casual/normal/hardcore sin valores incoherentes.
 
 ## D. Rescate Suave
 
@@ -43,6 +44,7 @@
 ## G. Build Gate
 
 - [ ] `npm run check:encoding` pasa.
+- [ ] `npm run check:i18n` pasa.
 - [ ] `npm run lint` pasa.
 - [ ] `npm run format:check` pasa.
 - [ ] `npm run build:web` pasa.

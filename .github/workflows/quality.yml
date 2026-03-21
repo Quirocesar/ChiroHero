@@ -26,6 +26,12 @@ jobs:
       - name: Check encoding
         run: npm run check:encoding
 
+      - name: Check i18n keys
+        run: npm run check:i18n
+
+      - name: Economy simulation smoke test
+        run: npm run qa:economy
+
       - name: Lint
         run: npm run lint
 
