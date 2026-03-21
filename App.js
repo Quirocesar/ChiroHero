@@ -21,6 +21,7 @@ import TutorialScreen from './src/screens/TutorialScreen';
 import AchievementsScreen from './src/screens/AchievementsScreen';
 import GameModeSelector from './src/screens/GameModeSelector';
 import ClinicModeSelectorScreen from './src/screens/ClinicModeSelectorScreen';
+import SalaCerradaScreen from './src/screens/SalaCerradaScreen';
 import IntroductionStory from './src/screens/IntroductionStory';
 import AppErrorBoundary from './src/components/AppErrorBoundary';
 import gameState from './src/utils/gameState';
@@ -254,6 +255,17 @@ export default function App() {
                 transitionSpec: {
                   open: { animation: 'timing', config: { duration: 300 } },
                   close: { animation: 'timing', config: { duration: 250 } },
+                },
+              }}
+            />
+            <Stack.Screen
+              name="SalaCerrada"
+              component={SalaCerradaScreen}
+              options={{
+                cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
+                transitionSpec: {
+                  open: { animation: 'spring', config: { stiffness: 100, damping: 15 } },
+                  close: { animation: 'timing', config: { duration: 300 } },
                 },
               }}
             />

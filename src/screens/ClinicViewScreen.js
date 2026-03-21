@@ -1092,8 +1092,7 @@ export default function ClinicViewScreen({ navigation, route }) {
       }
 
       const treatmentMode = gameState.get('treatmentMode') || 'auto';
-      const clinicMode = gameState.get('clinicMode') || 'closed';
-      const directAdjustMode = isWalmerTutorial || clinicMode === 'open';
+      const directAdjustMode = isWalmerTutorial;
       const shouldAutoTreat =
         treatmentMode === 'auto' ||
         (treatmentMode === 'hybrid' && !patientToOpen.isPremium && !patientToOpen.isReferralCase);
@@ -1121,10 +1120,14 @@ export default function ClinicViewScreen({ navigation, route }) {
         return;
       }
 
-      navigation.navigate('Consultation', {
-        patient: patientToOpen,
-        onResult: handlePatientComplete,
-      });
+      const clinicMode = gameState.get('clinicMode') || 'salaCerrada';
+
+      if (clinicMode === 'salaCerrada') {
+        navigation.navigate('SalaCerrada', { patient: patientToOpen });
+      } else {
+        // salaAbierta: AerialView handles patient flow (Task 9)
+        navigation.navigate('AerialView');
+      }
     },
     [
       handlePatientComplete,
