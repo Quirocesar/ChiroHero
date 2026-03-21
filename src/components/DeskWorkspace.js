@@ -15,12 +15,12 @@ function CoffeeMug() {
     <View style={styles.coffeeMug}>
       {/* Mug body */}
       <View style={styles.mugBody}>
-        <Px x={0} y={0} w={14} h={16} color="#e8e0d8" />
+        <Px x={0} y={0} w={14} h={16} color="#F1F5F9" />
         <Px x={1} y={1} w={12} h={2} color="#6b4226" />
         {/* Handle */}
-        <Px x={14} y={3} w={4} h={2} color="#e8e0d8" />
-        <Px x={16} y={5} w={2} h={6} color="#e8e0d8" />
-        <Px x={14} y={11} w={4} h={2} color="#e8e0d8" />
+        <Px x={14} y={3} w={4} h={2} color="#F1F5F9" />
+        <Px x={16} y={5} w={2} h={6} color="#F1F5F9" />
+        <Px x={14} y={11} w={4} h={2} color="#F1F5F9" />
       </View>
       {/* Steam */}
       <Px x={3} y={-6} w={2} h={4} color={COLORS.grayLight + '66'} />
@@ -45,11 +45,11 @@ function PenHolder() {
 function PostItNotes() {
   return (
     <View style={styles.postIts}>
-      <View style={[styles.postIt, { backgroundColor: '#fff59d' }]}>
+      <View style={[styles.postIt, { backgroundColor: '#FEF3C7' }]}>
         <Px x={2} y={3} w={16} h={1} color={COLORS.gray + '88'} />
         <Px x={2} y={6} w={12} h={1} color={COLORS.gray + '88'} />
       </View>
-      <View style={[styles.postIt, { backgroundColor: '#f8bbd0', top: 4, left: 6 }]}>
+      <View style={[styles.postIt, { backgroundColor: '#FCE7F3', top: 4, left: 6 }]}>
         <Px x={2} y={3} w={14} h={1} color={COLORS.gray + '88'} />
       </View>
     </View>
@@ -71,7 +71,7 @@ function WoodGrain() {
           right: 0,
           top: tops[i],
           height: 1,
-          backgroundColor: '#000',
+          backgroundColor: '#0F172A',
           opacity: opacities[i],
         }}
       />

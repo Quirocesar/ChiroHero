@@ -147,7 +147,7 @@ export default function XRayMiniGame({ condition, onComplete, onSkip, skillLevel
       const newFound = [...foundIndices, hitIndex];
       setFoundIndices(newFound);
       soundManager.playSuccess();
-      triggerFlash('#4a9e5c');
+      triggerFlash('#10B981');
       addFloatingText('+10%', locationX - 20, locationY - 30, COLORS.green);
 
       // Check if all found
@@ -159,7 +159,7 @@ export default function XRayMiniGame({ condition, onComplete, onSkip, skillLevel
       const newAttempts = attemptsLeft - 1;
       setAttemptsLeft(newAttempts);
       soundManager.playError();
-      triggerFlash('#c1374f');
+      triggerFlash('#EF4444');
       addFloatingText('FALLO', locationX - 20, locationY - 30, COLORS.red);
 
       if (newAttempts <= 0) {

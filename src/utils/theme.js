@@ -1,103 +1,111 @@
-// ChiroHero Theme — Warm Clinic Style (Prescribe & Pray inspired)
+// ChiroHero Theme — Clean Clinical (Teal / Emerald on Slate)
+import { Platform } from 'react-native';
+
 export const COLORS = {
-  // Backgrounds - Warm dark browns
-  bg: '#3f2832',
-  bgDark: '#2d1b24',
-  bgLight: '#5c3d4a',
-  bgMedium: '#4a2e3a',
+  // Backgrounds — dark slate
+  bg: '#0F172A',        // slate-900
+  bgDark: '#020617',    // slate-950
+  bgLight: '#1E293B',   // slate-800
+  bgMedium: '#334155',  // slate-700
 
-  // Desk / wood surfaces
-  desk: '#6b4c3b',
-  deskLight: '#8a6650',
-  deskDark: '#4a3328',
+  // Surfaces
+  desk: '#475569',      // slate-600
+  deskLight: '#64748B', // slate-500
+  deskDark: '#334155',  // slate-700
 
-  // Primary palette
-  primary: '#ffba35',
-  primaryLight: '#ffd06a',
-  primaryDark: '#d4951a',
-  secondary: '#8b4513',
-  secondaryLight: '#a0622d',
-  accent: '#4a9e5c',
-  accentLight: '#6bbd7a',
-  accentDark: '#357a44',
+  // Primary — teal
+  primary: '#0D9488',      // teal-600
+  primaryLight: '#14B8A6', // teal-500
+  primaryDark: '#0F766E',  // teal-700
+  secondary: '#64748B',    // slate-500
+  secondaryLight: '#94A3B8', // slate-400
+  accent: '#10B981',       // emerald-500
+  accentLight: '#34D399',  // emerald-400
+  accentDark: '#059669',   // emerald-600
 
   // Feedback
-  gold: '#e8a830',
-  goldLight: '#f4c55a',
-  goldDark: '#b8861e',
-  green: '#4a9e5c',
-  greenLight: '#6bbd7a',
-  greenDark: '#357a44',
-  red: '#c1374f',
-  redLight: '#e05068',
-  redDark: '#962a3e',
-  orange: '#d4731a',
-  orangeLight: '#e8943a',
+  gold: '#F59E0B',       // amber-500
+  goldLight: '#FBBF24',  // amber-400
+  goldDark: '#D97706',   // amber-600
+  green: '#10B981',      // emerald-500
+  greenLight: '#34D399', // emerald-400
+  greenDark: '#059669',  // emerald-600
+  red: '#EF4444',        // red-500
+  redLight: '#F87171',   // red-400
+  redDark: '#DC2626',    // red-600
+  orange: '#F97316',     // orange-500
+  orangeLight: '#FB923C', // orange-400
 
   // Neutrals
-  white: '#f7f3f2',
-  gray: '#9a8a80',
-  grayLight: '#c4b8b0',
-  grayDark: '#6a5a50',
-  dark: '#2b1810',
-  darkAlt: '#3a2820',
-  black: '#1a0e08',
+  white: '#F8FAFC',      // slate-50
+  gray: '#94A3B8',       // slate-400
+  grayLight: '#CBD5E1',  // slate-300
+  grayDark: '#64748B',   // slate-500
+  dark: '#0F172A',       // slate-900
+  darkAlt: '#1E293B',    // slate-800
+  black: '#020617',      // slate-950
 
   // UI borders
-  border: '#d7c8c4',
+  border: '#334155',     // slate-700
 
-  // Game specific
+  // Game specific — skin tones kept
   skin: '#ffdbac',
   skinDark: '#e8b88a',
   skinLight: '#ffe8cc',
-  bone: '#f0ead6',
-  boneDark: '#d4ceb8',
-  muscle: '#c1440e',
-  muscleLight: '#e05530',
-  healthy: '#4a9e5c',
-  inflamed: '#c1374f',
+  bone: '#E2E8F0',       // slate-200
+  boneDark: '#CBD5E1',   // slate-300
+  muscle: '#DC2626',     // red-600
+  muscleLight: '#EF4444', // red-500
+  healthy: '#10B981',    // emerald-500
+  inflamed: '#EF4444',   // red-500
 
-  // UI / paper
-  paper: '#f7f3f2',
-  paperDark: '#e8e0d8',
-  paperLight: '#fefcfb',
-  ink: '#2b1810',
-  inkLight: '#5a4035',
+  // UI / paper — clean whites
+  paper: '#FFFFFF',
+  paperDark: '#F1F5F9',  // slate-100
+  paperLight: '#FFFFFF',
+  ink: '#0F172A',        // slate-900
+  inkLight: '#475569',   // slate-600
 
-  // Clinic walls & floor
-  wall: '#d4c4b0',
-  wallDark: '#b8a898',
-  wallTop: '#d4c4b0',      // backward-compat alias → wall
-  wallBottom: '#b8a898',   // backward-compat alias → wallDark
-  floor: '#6b4c3b',        // backward-compat alias → desk
-  floorLight: '#8a6650',   // backward-compat alias → deskLight
-  furniture: '#5a4030',
-  furnitureDark: '#4a3328',
+  // Clinic walls & floor — dark slate
+  wall: '#1E293B',       // slate-800
+  wallDark: '#0F172A',   // slate-900
+  wallTop: '#1E293B',
+  wallBottom: '#0F172A',
+  floor: '#334155',      // slate-700
+  floorLight: '#475569', // slate-600
+  furniture: '#1E293B',  // slate-800
+  furnitureDark: '#0F172A', // slate-900
 
   // Special/rare
-  diamond: '#b9f2ff',
-  diamondDark: '#7ac5cd',
-  legendary: '#ffd700',
-  epic: '#a335ee',
-  rare: '#0070dd',
-  uncommon: '#1eff00',
+  diamond: '#67E8F9',    // cyan-300
+  diamondDark: '#22D3EE', // cyan-400
+  legendary: '#FBBF24',  // amber-400
+  epic: '#A855F7',       // purple-500
+  rare: '#3B82F6',       // blue-500
+  uncommon: '#22C55E',   // green-500
 };
 
+export const SYSTEM_FONT = Platform.select({
+  ios: 'System',
+  android: 'sans-serif',
+  default: 'system-ui, -apple-system, sans-serif',
+});
+
 export const PIXEL_FONT = {
-  fontFamily: 'monospace',
+  fontFamily: SYSTEM_FONT,
 };
 
 export const PIXEL_BORDER = {
-  borderWidth: 1.5,
+  borderWidth: 1,
   borderColor: COLORS.border,
 };
 
 export const PIXEL_SHADOW = {
   shadowColor: '#000',
-  shadowOffset: { width: 1, height: 2 },
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-  elevation: 3,
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.15,
+  shadowRadius: 8,
+  elevation: 4,
 };
 
 export function lighten(hex, amount = 40) {

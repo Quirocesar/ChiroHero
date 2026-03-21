@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     zIndex: 100, // Make sure it's above everything
   },
   text: {
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Animated, Dimensions, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, StyleSheet, Animated, Dimensions, ScrollView, TouchableOpacity, TextInput, Platform } from 'react-native';
 import { COLORS, lighten } from '../utils/theme';
 import PixelButton from '../components/PixelButton';
 import PixelText from '../components/PixelText';
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     color: COLORS.primary,
-    fontFamily: 'monospace',
+    fontFamily: Platform.select({ ios: 'System', android: 'sans-serif', default: 'system-ui, -apple-system, sans-serif' }),
     fontSize: 18,
     paddingHorizontal: 10,
     paddingVertical: 8,

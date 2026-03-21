@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
     left: 2,
     right: 2,
     height: 10,
-    backgroundColor: '#5c3010',
+    backgroundColor: COLORS.bgLight,
     borderRadius: 2,
   },
   mugHandle: {
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   pot: {
     width: 26,
     height: 18,
-    backgroundColor: '#b5622b',
+    backgroundColor: COLORS.primary,
     borderRadius: 2,
     borderBottomLeftRadius: 4,
     borderBottomRightRadius: 4,
@@ -1013,7 +1013,7 @@ const styles = StyleSheet.create({
   potRim: {
     width: 30,
     height: 5,
-    backgroundColor: '#c87840',
+    backgroundColor: COLORS.primaryLight,
     borderRadius: 2,
     marginTop: -3,
   },

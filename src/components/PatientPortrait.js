@@ -138,7 +138,7 @@ export default function PatientPortrait({
   const eyeWhite     = '#f0f0f0';
   const mouthColor   = '#b03030';
   const noseColor    = darkenColor(skinColor, 22);
-  const teethColor   = '#f7f3f2';
+  const teethColor   = '#F8FAFC';
   const blushColor   = '#f4a8a0';
 
   // ── Procedural feature indices ──────────────
@@ -572,7 +572,7 @@ export default function PatientPortrait({
           break;
         }
         case 2: { // bandage (forehead strip, rows 4-5)
-          pixels.push(P(faceLeft + 1, 4, '#f7f3f2', faceWidth - 2, 2));
+          pixels.push(P(faceLeft + 1, 4, '#F8FAFC', faceWidth - 2, 2));
           pixels.push(P(faceLeft + 3, 4, '#e8b88a', 1, 2)); // tape cross
           pixels.push(P(faceRight - 4, 4, '#e8b88a', 1, 2));
           break;

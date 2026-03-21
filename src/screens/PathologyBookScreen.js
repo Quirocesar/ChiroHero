@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   redFlagsSection: {
-    backgroundColor: '#fff5f5',
+    backgroundColor: '#FEF2F2',
     borderWidth: 2,
     borderColor: COLORS.red,
     borderRadius: 6,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   actionSection: {
-    backgroundColor: '#f5f5ff',
+    backgroundColor: '#EFF6FF',
     borderWidth: 2,
     borderColor: COLORS.primary,
     borderRadius: 6,

@@ -27,8 +27,8 @@ const ZONE_CONFIG = {
   thoracic: {
     yMin: 0.20,
     yMax: 0.58,
-    color: '#4A9E5C',
-    colorLight: '#6BBD7A',
+    color: '#10B981',
+    colorLight: '#34D399',
     label: 'T1-T12',
     vertebrae: 12,
   },
@@ -43,8 +43,8 @@ const ZONE_CONFIG = {
   gluteal: {
     yMin: 0.82,
     yMax: 0.96,
-    color: '#8B4513',
-    colorLight: '#A0622D',
+    color: '#64748B',
+    colorLight: '#94A3B8',
     label: 'S/Cx',
     vertebrae: 3,
   },

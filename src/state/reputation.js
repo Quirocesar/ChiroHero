@@ -24,7 +24,7 @@ export const RANK_TIERS = {
   Silver: { minRep: 501, maxRep: 1500, color: '#c0c0c0' },
   Gold: { minRep: 1501, maxRep: 4000, color: '#ffd700' },
   Platinum: { minRep: 4001, maxRep: 10000, color: '#e5e4e2' },
-  Diamond: { minRep: 10001, maxRep: Infinity, color: '#b9f2ff' },
+  Diamond: { minRep: 10001, maxRep: Infinity, color: '#67E8F9' },
 };
 
 export function getReputationLevel(rep) {

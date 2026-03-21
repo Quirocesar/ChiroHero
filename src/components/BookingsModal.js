@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   monitor: {
     width: '100%',
     maxWidth: 400,
-    backgroundColor: '#dbd9d6', // classic retro PC color
+    backgroundColor: '#E2E8F0', // slate-200
     padding: 10,
     borderWidth: 4,
     borderColor: '#888',
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   screen: {
     width: '100%',
-    backgroundColor: '#0a0a2a', // CRT dark blue/black
+    backgroundColor: '#0F172A', // slate-900
     borderWidth: 8,
     borderColor: '#222',
     height: 400,
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   stand: {
     width: 60,
     height: 30,
-    backgroundColor: '#b5b3b0',
+    backgroundColor: '#CBD5E1',
     borderLeftWidth: 4,
     borderRightWidth: 4,
     borderColor: '#888',
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   base: {
     width: 140,
     height: 15,
-    backgroundColor: '#dbd9d6',
+    backgroundColor: '#E2E8F0',
     borderWidth: 4,
     borderColor: '#888',
   },

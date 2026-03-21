@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   clipShadow: {
     width: 20,
     height: 4,
-    backgroundColor: '#444',
+    backgroundColor: '#334155',
     alignSelf: 'center',
   },
   paper: {
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   vipStamp: {
     marginTop: 4,
-    backgroundColor: '#fff8e0',
+    backgroundColor: '#FFFBEB',
     borderWidth: 1,
     borderColor: COLORS.gold,
     paddingHorizontal: 6,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     color: COLORS.ink,
   },
   warningBox: {
-    backgroundColor: '#fff0f0',
+    backgroundColor: '#FEF2F2',
     borderWidth: 3,
     borderColor: COLORS.red,
     padding: 10,

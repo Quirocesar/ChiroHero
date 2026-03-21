@@ -53,7 +53,7 @@ export default class AppErrorBoundary extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0d0d1a',
+    backgroundColor: '#0F172A',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#5b7cfa',
+    backgroundColor: '#0D9488',
     paddingHorizontal: 18,
     paddingVertical: 12,
     borderRadius: 10,

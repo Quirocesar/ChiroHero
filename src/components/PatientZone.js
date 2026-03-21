@@ -61,12 +61,12 @@ function PetDog({ visible }) {
         },
       ]}
     >
-      <Px x={8} y={0} w={8} h={6} color="#8b4513" />
+      <Px x={8} y={0} w={8} h={6} color="#64748B" />
       <Px x={4} y={2} w={4} h={4} color="#a0522d" />
       <Px x={0} y={0} w={4} h={4} color="#a0522d" />
-      <Px x={8} y={6} w={10} h={8} color="#8b4513" />
-      <Px x={6} y={14} w={4} h={4} color="#8b4513" />
-      <Px x={14} y={14} w={4} h={4} color="#8b4513" />
+      <Px x={8} y={6} w={10} h={8} color="#64748B" />
+      <Px x={6} y={14} w={4} h={4} color="#64748B" />
+      <Px x={14} y={14} w={4} h={4} color="#64748B" />
       <Px x={2} y={10} w={2} h={2} color="#000" />
       <Px x={10} y={10} w={2} h={2} color="#000" />
     </Animated.View>

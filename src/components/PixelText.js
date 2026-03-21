@@ -1,45 +1,33 @@
 import React from 'react';
 import { Text, View, StyleSheet, Platform } from 'react-native';
-import { COLORS } from '../utils/theme';
+import { COLORS, SYSTEM_FONT } from '../utils/theme';
 
-export default function PixelText({ children, style, size = 'normal', color = COLORS.white, center, shadow = true, glow = false, outline = false, badge = false, badgeColor, fontFamily = 'mono' }) {
-  const isUI = fontFamily === 'ui';
+export default function PixelText({ children, style, size = 'normal', color = COLORS.white, center, shadow = false, glow = false, outline = false, badge = false, badgeColor, fontFamily = 'default' }) {
+  const fontStyle = {
+    fontFamily: SYSTEM_FONT,
+    fontWeight: sizes[size]?.fontWeight || '400',
+    letterSpacing: 0.3,
+  };
 
-  const fontStyle = isUI
+  const shadowStyle = shadow
     ? {
-        fontFamily: Platform.select({ ios: 'System', android: 'sans-serif', default: undefined }),
-        fontWeight: 'normal',
-        letterSpacing: 0.5,
+        textShadowColor: 'rgba(0,0,0,0.15)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 3,
       }
-    : {
-        fontFamily: 'monospace',
-        fontWeight: 'bold',
-        letterSpacing: 1,
-      };
-
-  const shadowStyle = isUI
-    ? {
-        textShadowColor: 'rgba(0,0,0,0.3)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 2,
-      }
-    : {
-        textShadowColor: 'rgba(0,0,0,0.9)',
-        textShadowOffset: { width: 2, height: 2 },
-        textShadowRadius: 1,
-      };
+    : {};
 
   const textElement = (
     <Text
       style={[
         styles.base,
         fontStyle,
-        sizes[size] || sizes.normal,
+        { fontSize: sizes[size]?.fontSize || 15, lineHeight: sizes[size]?.lineHeight || 21 },
         { color },
         center && styles.center,
-        shadow && shadowStyle,
-        glow && { textShadowColor: color, textShadowRadius: 8 },
-        outline && { textShadowColor: COLORS.dark, textShadowRadius: 3 },
+        shadowStyle,
+        glow && { textShadowColor: COLORS.primary, textShadowRadius: 12, textShadowOffset: { width: 0, height: 0 } },
+        outline && { textShadowColor: 'rgba(0,0,0,0.3)', textShadowRadius: 4 },
         style,
       ]}
     >
@@ -49,7 +37,7 @@ export default function PixelText({ children, style, size = 'normal', color = CO
 
   if (badge) {
     return (
-      <View style={[styles.badge, { backgroundColor: badgeColor || color + '25', borderColor: color + '50' }]}>
+      <View style={[styles.badge, { backgroundColor: (badgeColor || color) + '18', borderColor: (badgeColor || color) + '40' }]}>
         {textElement}
       </View>
     );
@@ -59,28 +47,28 @@ export default function PixelText({ children, style, size = 'normal', color = CO
 }
 
 const sizes = {
-  tiny: { fontSize: 11, lineHeight: 15 },
-  small: { fontSize: 13, lineHeight: 17 },
-  normal: { fontSize: 15, lineHeight: 21 },
-  medium: { fontSize: 19, lineHeight: 25 },
-  large: { fontSize: 25, lineHeight: 31 },
-  xlarge: { fontSize: 33, lineHeight: 39 },
-  title: { fontSize: 41, lineHeight: 47 },
-  giant: { fontSize: 57, lineHeight: 63 },
+  tiny:   { fontSize: 11, lineHeight: 16, fontWeight: '400' },
+  small:  { fontSize: 13, lineHeight: 18, fontWeight: '400' },
+  normal: { fontSize: 15, lineHeight: 22, fontWeight: '400' },
+  medium: { fontSize: 19, lineHeight: 26, fontWeight: '600' },
+  large:  { fontSize: 25, lineHeight: 32, fontWeight: '600' },
+  xlarge: { fontSize: 33, lineHeight: 40, fontWeight: '700' },
+  title:  { fontSize: 41, lineHeight: 48, fontWeight: '700' },
+  giant:  { fontSize: 57, lineHeight: 64, fontWeight: '700' },
 };
 
 const styles = StyleSheet.create({
   base: {
-    letterSpacing: 1,
+    letterSpacing: 0.3,
   },
   center: {
     textAlign: 'center',
   },
   badge: {
-    borderWidth: 2,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
     alignSelf: 'flex-start',
   },
 });

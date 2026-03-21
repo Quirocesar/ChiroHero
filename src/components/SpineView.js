@@ -889,7 +889,7 @@ const styles = StyleSheet.create({
   // Examination table outer wrapper - medical table aesthetic
   tableOuter: {
     width: SPINE_WIDTH + 16,
-    backgroundColor: '#ede4d3',
+    backgroundColor: '#F1F5F9',
     borderRadius: 14,
     paddingHorizontal: 8,
     paddingBottom: 12,
@@ -908,7 +908,7 @@ const styles = StyleSheet.create({
   pillow: {
     width: SPINE_WIDTH * 0.55,
     height: 20,
-    backgroundColor: '#f5f0e6',
+    backgroundColor: '#F8FAFC',
     borderRadius: 10,
     marginBottom: 8,
     borderWidth: 1.5,
@@ -924,7 +924,7 @@ const styles = StyleSheet.create({
   backView: {
     width: SPINE_WIDTH,
     height: SPINE_HEIGHT,
-    backgroundColor: '#ffe8cc',
+    backgroundColor: '#FEF3C7',
     borderWidth: 2,
     borderColor: '#d4b896',
     borderRadius: 10,
