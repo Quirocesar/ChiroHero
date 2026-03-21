@@ -1,5 +1,6 @@
 // Patient generation system with SOAP reports and pathology detection
 import { normalizeDeepText, normalizeDisplayText } from '../utils/textSanitizer';
+import { pickPersonality } from './patientPersonalities';
 
 const FIRST_NAMES = [
   'María',
@@ -1490,6 +1491,7 @@ function generatePatient(skillLevel = 1, day = 1, reputation = 0, consultPrice =
     discountRejected: false,
     satisfaction: 0,
     avatar: generatePixelAvatar(age, firstName),
+    personality: pickPersonality(),
   });
 }
 
@@ -1529,6 +1531,7 @@ export function generatePremiumPatient(reputation) {
     payment: randomBetween(500, 1000) * premium.payMultiplier,
     satisfaction: 0,
     avatar: { hairColor: '#FFD700', skinTone: '#ffdbac', expression: 'determined' },
+    personality: pickPersonality(),
   });
 }
 
