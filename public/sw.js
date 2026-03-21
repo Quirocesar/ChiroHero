@@ -1,4 +1,5 @@
-const CACHE_NAME = 'chirohero-v1';
+const CACHE_VERSION = 'v1';
+const CACHE_NAME = `chirohero-${CACHE_VERSION}`;
 const urlsToCache = [
   '/',
   '/index.html',

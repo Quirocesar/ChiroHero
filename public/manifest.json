@@ -1,29 +1,32 @@
 {
-  "name": "ChiroHero - Quiropráctico",
+  "name": "ChiroHero - Clínica Quiropráctica",
   "short_name": "ChiroHero",
-  "description": "Aprende quiropráctica jugando - Juego de clínica quiropráctica",
+  "description": "Gestiona tu propia clínica quiropráctica. Atiende pacientes, diagnostica patologías, aplica técnicas manuales y haz crecer tu reputación. ¡El simulador de quiropráctica más completo!",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d0d1a",
   "theme_color": "#1a1a2e",
   "orientation": "portrait",
-  "scope": "/",
+  "lang": "es",
+  "categories": ["games", "education"],
   "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "screenshots": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
+      "src": "screenshot-mobile.png",
+      "sizes": "375x812",
       "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "narrow",
+      "label": "Menú principal en móvil"
     },
     {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
+      "src": "screenshot-desktop.png",
+      "sizes": "1280x720",
       "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "wide",
+      "label": "Vista de clínica en escritorio"
     }
-  ],
-  "categories": ["games", "education"],
-  "lang": "es",
-  "dir": "ltr",
-  "prefer_related_applications": false
+  ]
 }
