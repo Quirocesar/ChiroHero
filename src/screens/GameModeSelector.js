@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Animated, Dimensions, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { COLORS, lighten, darken } from '../utils/theme';
+import { COLORS, lighten } from '../utils/theme';
 import PixelButton from '../components/PixelButton';
 import PixelText from '../components/PixelText';
 import gameState from '../utils/gameState';
@@ -103,7 +103,12 @@ export default function GameModeSelector({ navigation }) {
       treatmentMode: gameState.get('treatmentMode') || 'auto',
     });
     await gameState.save();
-    navigation.navigate('ClinicModeSelector');
+    const tutorialStep = gameState.get('tutorialStep') || 0;
+    if (tutorialStep === 0) {
+      navigation.navigate('TutorialScreen'); // tutorial will navigate to ClinicModeSelector on finish
+    } else {
+      navigation.navigate('ClinicModeSelector');
+    }
   };
 
   const handleBack = () => {

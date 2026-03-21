@@ -14,6 +14,7 @@ import gameState from '../utils/gameState';
 import soundManager from '../utils/soundManager';
 import i18n from '../utils/i18n';
 import SaveSelectModal from '../components/SaveSelectModal';
+import TutorialTarget from '../components/TutorialTarget';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = Math.min(width * 0.88, 380);
@@ -455,16 +456,18 @@ export default function MainMenuScreen({ navigation }) {
             },
           ]}
         >
-          <PixelButton
-            title={`  ${i18n.t('play')}  `}
-            onPress={() => {
-              soundManager.playClick();
-              setShowSaveModal(true);
-            }}
-            variant="primary"
-            size="large"
-            style={styles.playButton}
-          />
+          <TutorialTarget id="playButton">
+            <PixelButton
+              title={`  ${i18n.t('play')}  `}
+              onPress={() => {
+                soundManager.playClick();
+                setShowSaveModal(true);
+              }}
+              variant="primary"
+              size="large"
+              style={styles.playButton}
+            />
+          </TutorialTarget>
         </Animated.View>
 
         {/* ── Stacked file tabs ──────────────────────────────────────────── */}

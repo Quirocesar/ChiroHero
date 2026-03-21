@@ -11,6 +11,7 @@ import gameState from '../utils/gameState';
 import { t } from '../utils/i18n';
 import { getCADialogue } from '../data/staff';
 import { shouldTriggerNeuroTest } from '../data/neuroTests';
+import TutorialTarget from '../components/TutorialTarget';
 
 // Lazy-load mini-game components (they may not exist yet during development)
 let PalpationMiniGame = null;
@@ -256,7 +257,11 @@ export default function ConsultationScreen({ route, navigation }) {
       )}
 
       {/* SOAP Report */}
-      {!decision && <SOAPReport patient={patient} />}
+      {!decision && (
+        <TutorialTarget id="soapCard">
+          <SOAPReport patient={patient} />
+        </TutorialTarget>
+      )}
 
       {/* Decision result - correct referral */}
       {decision === 'correct_refer' && (
@@ -389,12 +394,14 @@ export default function ConsultationScreen({ route, navigation }) {
               )}
             </View>
 
-            <PixelButton
-              title={t('treatPatient')}
-              icon="🤲"
-              color={COLORS.green}
-              onPress={handleTreat}
-            />
+            <TutorialTarget id="treatBtn">
+              <PixelButton
+                title={t('treatPatient')}
+                icon="🤲"
+                color={COLORS.green}
+                onPress={handleTreat}
+              />
+            </TutorialTarget>
             <PixelButton
               title="TRATAR MANUALMENTE"
               icon="🖐"

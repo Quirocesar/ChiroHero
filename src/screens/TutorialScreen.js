@@ -5,6 +5,7 @@ import BackHeader from '../components/BackHeader';
 import PixelText from '../components/PixelText';
 import PixelButton from '../components/PixelButton';
 import PixelCard from '../components/PixelCard';
+import TutorialOverlay from '../components/TutorialOverlay';
 import gameState from '../utils/gameState';
 import soundManager from '../utils/soundManager';
 import { t } from '../utils/i18n';
@@ -13,50 +14,58 @@ const { width } = Dimensions.get('window');
 
 const TUTORIAL_STEPS = [
   {
-    icon: '🎓',
-    titleKey: 'tutWelcomeTitle',
-    title: 'WALMER UNIVERSITY',
-    subtitle: 'Chiropractic School',
-    content: 'Welcome, future chiropractor! You are about to begin your career treating patients with spinal problems. Let\'s learn the basics.',
-    contentEs: '¡Bienvenido, futuro quiropráctico! Estás a punto de comenzar tu carrera tratando pacientes con problemas de espalda. Aprendamos lo básico.',
-    color: COLORS.gold,
+    id: 'step1',
+    targetId: 'playButton',
+    title: '¡Bienvenido a ChiroHero!',
+    text: 'Pulsa JUGAR para abrir tu clínica quiropráctica y empezar a atender pacientes.',
   },
   {
-    icon: '📋',
-    title: 'SOAP REPORT',
-    subtitle: 'Diagnose your patients',
-    content: 'Each patient brings a SOAP report:\n\n[S] Subjective - What the patient tells you\n[O] Objective - What you observe\n[A] Assessment - Your diagnosis\n[P] Plan - Treat or refer?\n\nRead carefully for RED FLAGS!',
-    contentEs: 'Cada paciente trae un informe SOAP:\n\n[S] Subjetivo - Lo que dice el paciente\n[O] Objetivo - Lo que observas\n[A] Evaluación - Tu diagnóstico\n[P] Plan - ¿Tratar o derivar?\n\n¡Busca BANDERAS ROJAS!',
-    color: COLORS.accent,
+    id: 'step2',
+    targetId: 'openClinicBtn',
+    title: 'Abre tu clínica',
+    text: 'Toca ABRIR CONSULTA para comenzar el día. La sala de espera se llenará de pacientes.',
   },
   {
-    icon: '⚠️',
-    title: 'RED FLAGS',
-    subtitle: 'Know when to refer',
-    content: 'Some patients have DANGEROUS conditions:\n\n🔴 Cauda Equina Syndrome\n🔴 Suspected fractures\n🔴 Myelopathy\n🔴 Tumors\n🔴 Infections\n🔴 Vascular pathology\n\nALWAYS refer these to a specialist! Check the Pathology Manual.',
-    contentEs: 'Algunos pacientes tienen condiciones PELIGROSAS:\n\n🔴 Síndrome de Cauda Equina\n🔴 Fracturas sospechadas\n🔴 Mielopatía\n🔴 Tumores\n🔴 Infecciones\n🔴 Patología vascular\n\n¡SIEMPRE deriva estos al especialista! Consulta el Manual de Patologías.',
-    color: COLORS.red,
+    id: 'step3',
+    targetId: null,
+    title: 'Elige tu estilo',
+    text: 'Sala Cerrada: atención personalizada, más herramientas, más ingresos por paciente. Sala Abierta: más volumen, vista aérea, hasta 6 camillas.',
   },
   {
-    icon: '🤲',
-    title: 'TREATMENT',
-    subtitle: 'Heal your patients',
-    content: 'When treating:\n\n✕ Red dots = Subluxations (tap to adjust)\n● Orange dots = Contractures (tap multiple times)\n\n✅ Tap correct zones → bones crack, muscles release\n❌ Tap wrong zones → patient complains!\n\nBuild COMBOS for bonus rewards!',
-    contentEs: 'Al tratar:\n\n✕ Puntos rojos = Subluxaciones (toca para ajustar)\n● Puntos naranjas = Contracturas (toca varias veces)\n\n✅ Toca zonas correctas → huesos crujen, músculos se liberan\n❌ Toca zonas incorrectas → ¡el paciente se queja!\n\n¡Haz COMBOS para bonificaciones!',
-    color: COLORS.green,
+    id: 'step4',
+    targetId: 'soapCard',
+    title: 'Informe SOAP del paciente',
+    text: 'Lee la ficha: Subjetivo (motivo), Objetivo (exploración), Evaluación (diagnóstico), Plan (tratamiento).',
   },
   {
-    icon: '💰',
-    title: 'GROW YOUR CLINIC',
-    subtitle: 'Build your empire',
-    content: 'With money earned:\n\n🔧 Buy tools (Activator, TENS, Ultrasound...)\n🏥 Upgrade your clinic\n📚 Study new techniques\n👥 Hire staff & assistants\n✈️ Travel to international events\n\nBecome the best chiropractor in the world!',
-    contentEs: 'Con el dinero ganado:\n\n🔧 Compra herramientas (Activador, TENS, Ultrasonido...)\n🏥 Mejora tu clínica\n📚 Estudia nuevas técnicas\n👥 Contrata personal y asistentes\n✈️ Viaja a eventos internacionales\n\n¡Conviértete en el mejor quiropráctico del mundo!',
-    color: COLORS.secondary,
+    id: 'step5',
+    targetId: 'treatBtn',
+    title: 'Tratar al paciente',
+    text: 'ATENDER AUTOMÁTICAMENTE es rápido. TRATAR MANUALMENTE activa un minijuego y te da hasta 1.5× de recompensa.',
+  },
+  {
+    id: 'step6',
+    targetId: null,
+    title: 'Minijuego: Palpación',
+    text: 'Toca las zonas dolorosas en el mapa de columna. Cada zona correcta suma puntos. ¡La precisión importa!',
+  },
+  {
+    id: 'step7',
+    targetId: null,
+    title: 'Resultado',
+    text: 'Al terminar ves tus ganancias y cambio de reputación. Más reputación = más pacientes mañana.',
+  },
+  {
+    id: 'step8',
+    targetId: null,
+    title: '¡Listo para empezar!',
+    text: 'Atiende pacientes, gana dinero, mejora tu clínica en la Tienda, y desbloquea logros. ¡Mucho éxito, Doctor!',
   },
 ];
 
 export default function TutorialScreen({ navigation }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -82,11 +91,18 @@ export default function TutorialScreen({ navigation }) {
   };
 
   const handleNext = () => {
-    if (currentStep < TUTORIAL_STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (stepIndex < TUTORIAL_STEPS.length - 1) {
+      setStepIndex(prev => prev + 1);
     } else {
-      handleComplete();
+      // Tutorial complete
+      gameState.set({ tutorialStep: 9, hasCompletedTutorial: true });
+      navigation.navigate('ClinicModeSelector');
     }
+  };
+
+  const handleSkip = () => {
+    gameState.set({ tutorialStep: 9, hasCompletedTutorial: true });
+    navigation.navigate('ClinicModeSelector');
   };
 
   const handlePrev = () => {
@@ -102,9 +118,10 @@ export default function TutorialScreen({ navigation }) {
     navigation.replace('ClinicView');
   };
 
-  const step = TUTORIAL_STEPS[currentStep];
+  const step = TUTORIAL_STEPS[currentStep] || TUTORIAL_STEPS[0];
+  const stepColor = step.color || COLORS.primary;
   const isSpanish = lang === 'es' || lang === 'pt' || lang === 'it' || lang === 'fr';
-  const content = isSpanish && step.contentEs ? step.contentEs : step.content;
+  const content = (isSpanish && step.contentEs) ? step.contentEs : (step.content || step.text || '');
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
@@ -126,7 +143,7 @@ export default function TutorialScreen({ navigation }) {
         </View>
         {/* Progress bar */}
         <View style={styles.progressBar}>
-          <Animated.View style={[styles.progressFill, { width: progressWidth, backgroundColor: step.color }]} />
+          <Animated.View style={[styles.progressFill, { width: progressWidth, backgroundColor: stepColor }]} />
         </View>
       </View>
 
@@ -137,23 +154,25 @@ export default function TutorialScreen({ navigation }) {
           transform: [{ translateY: slideAnim }],
         }]}>
           {/* Step icon */}
-          <View style={[styles.iconContainer, { borderColor: step.color }]}>
-            <PixelText size="giant" center>{step.icon}</PixelText>
+          <View style={[styles.iconContainer, { borderColor: stepColor }]}>
+            <PixelText size="giant" center>{step.icon || '🎓'}</PixelText>
           </View>
 
           {/* Step title */}
-          <PixelText size="large" color={step.color} center glow>
+          <PixelText size="large" color={stepColor} center glow>
             {step.title}
           </PixelText>
-          <PixelText size="small" color={COLORS.gray} center style={styles.subtitle}>
-            {step.subtitle}
-          </PixelText>
+          {step.subtitle ? (
+            <PixelText size="small" color={COLORS.gray} center style={styles.subtitle}>
+              {step.subtitle}
+            </PixelText>
+          ) : null}
 
           {/* Divider */}
-          <View style={[styles.divider, { backgroundColor: step.color }]} />
+          <View style={[styles.divider, { backgroundColor: stepColor }]} />
 
           {/* Content card */}
-          <PixelCard color={COLORS.dark} borderColor={step.color}>
+          <PixelCard color={COLORS.dark} borderColor={stepColor}>
             <PixelText size="small" color={COLORS.white} style={styles.contentText}>
               {content}
             </PixelText>
@@ -167,7 +186,7 @@ export default function TutorialScreen({ navigation }) {
                 style={[
                   styles.dot,
                   {
-                    backgroundColor: i === currentStep ? step.color : i < currentStep ? COLORS.green : COLORS.grayDark,
+                    backgroundColor: i === currentStep ? stepColor : i < currentStep ? COLORS.green : COLORS.grayDark,
                     width: i === currentStep ? 14 : 8,
                   },
                 ]}
@@ -193,7 +212,7 @@ export default function TutorialScreen({ navigation }) {
           {currentStep < TUTORIAL_STEPS.length - 1 ? (
             <PixelButton
               title="NEXT →"
-              color={step.color}
+              color={stepColor}
               onPress={handleNext}
               style={styles.navBtn}
             />
@@ -215,6 +234,11 @@ export default function TutorialScreen({ navigation }) {
           style={styles.skipBtn}
         />
       </View>
+      <TutorialOverlay
+        step={TUTORIAL_STEPS[stepIndex]}
+        onNext={handleNext}
+        onSkip={handleSkip}
+      />
     </View>
   );
 }

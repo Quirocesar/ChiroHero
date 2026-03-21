@@ -7,6 +7,7 @@ import PixelCard from './PixelCard';
 import Px from './Px';
 import DailyMissionsWidget from './DailyMissionsWidget';
 import gameState from '../utils/gameState';
+import TutorialTarget from './TutorialTarget';
 import soundManager from '../utils/soundManager';
 import { t } from '../utils/i18n';
 
@@ -267,13 +268,15 @@ export default function ActionBar({
         {/* PRE-DAY actions */}
         {!dayStarted && !dayEnded && (
           <>
-            <PixelButton
-              title={t('openClinic')}
-              icon="+"
-              variant="primary"
-              onPress={onStartDay}
-              style={styles.mainBtn}
-            />
+            <TutorialTarget id="openClinicBtn">
+              <PixelButton
+                title={t('openClinic')}
+                icon="+"
+                variant="primary"
+                onPress={onStartDay}
+                style={styles.mainBtn}
+              />
+            </TutorialTarget>
             {!isWalmerTutorial && (
               <>
                 <View style={styles.consultPriceRow}>
