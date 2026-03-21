@@ -24,6 +24,7 @@ import ClinicModeSelectorScreen from './src/screens/ClinicModeSelectorScreen';
 import SalaCerradaScreen from './src/screens/SalaCerradaScreen';
 import IntroductionStory from './src/screens/IntroductionStory';
 import AppErrorBoundary from './src/components/AppErrorBoundary';
+import { TutorialProvider } from './src/utils/TutorialContext';
 import gameState from './src/utils/gameState';
 import telemetry from './src/utils/telemetry';
 import TELEMETRY_EVENTS from './src/utils/telemetryEvents';
@@ -109,10 +110,11 @@ export default function App() {
   }, []);
 
   return (
-    <>
-      <StatusBar style="light" />
-      <AppErrorBoundary onError={handleAppCrash} onReset={handleAppReset}>
-        <NavigationContainer key={`root-${appResetKey}`}>
+    <TutorialProvider>
+      <>
+        <StatusBar style="light" />
+        <AppErrorBoundary onError={handleAppCrash} onReset={handleAppReset}>
+          <NavigationContainer key={`root-${appResetKey}`}>
           <Stack.Navigator
             initialRouteName="IntroVideo"
             screenOptions={{
@@ -281,8 +283,9 @@ export default function App() {
               }}
             />
           </Stack.Navigator>
-        </NavigationContainer>
-      </AppErrorBoundary>
-    </>
+          </NavigationContainer>
+        </AppErrorBoundary>
+      </>
+    </TutorialProvider>
   );
 }
