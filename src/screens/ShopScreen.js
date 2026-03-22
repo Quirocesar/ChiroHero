@@ -21,12 +21,12 @@ const TAB_ACCENTS = {
 };
 
 const TABS = [
-  { id: 'tools',  icon: '🔧', labelKey: 'tabTools' },
-  { id: 'clinic', icon: '🏥', labelKey: 'tabClinic' },
-  { id: 'skills', icon: '📚', labelKey: 'tabSkills' },
-  { id: 'staff',  icon: '👥', labelKey: 'tabStaff' },
-  { id: 'expand', icon: '🏗️', labelKey: 'tabExpand' },
-  { id: 'decor',  icon: '🎨', labelKey: 'tabDecor' },
+  { id: 'tools',  icon: '🔧', labelKey: 'tools' },
+  { id: 'clinic', icon: '🏥', labelKey: 'clinic' },
+  { id: 'skills', icon: '📚', labelKey: 'skills' },
+  { id: 'staff',  icon: '👥', labelKey: 'staff' },
+  { id: 'expand', icon: '🏗️', labelKey: 'expand' },
+  { id: 'decor',  icon: '🎨', labelKey: 'shopDecor' },
 ];
 
   export default function ShopScreen({ navigation }) {
@@ -118,7 +118,7 @@ const TABS = [
           </View>
           {!owned && (
             <PixelButton
-              title={state.money >= tool.cost ? t('buy') : t('notEnoughMoney')}
+              title={state.money >= tool.cost ? t('buy') : t('notEnough')}
               color={state.money >= tool.cost ? COLORS.green : COLORS.grayDark}
               onPress={() => handlePurchase(tool.id, tool.cost)}
               disabled={state.money < tool.cost}
@@ -341,7 +341,7 @@ const TABS = [
               )}
               {!owned && requiresMet && (
                 <PixelButton
-                  title={canBuy ? t('hire') : t('notEnoughMoney')}
+                  title={canBuy ? t('hire') : t('notEnough')}
                   color={canBuy ? TAB_ACCENTS.staff : COLORS.grayDark}
                   onPress={() => handleStaffPurchase(staff.id, staff.cost)}
                   disabled={!canBuy}
@@ -474,7 +474,7 @@ const TABS = [
               </View>
               {!owned && (
                 <PixelButton
-                  title={state.money >= item.cost ? t('buy') : t('notEnoughMoney')}
+                  title={state.money >= item.cost ? t('buy') : t('notEnough')}
                   color={state.money >= item.cost ? COLORS.green : COLORS.grayDark}
                   onPress={() => handleDecorPurchase(item.id, item.cost)}
                   disabled={state.money < item.cost}
