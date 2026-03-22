@@ -1,4 +1,4 @@
-{
+﻿{
   "expo": {
     "name": "ChiroHero",
     "slug": "ChiroHero",
@@ -9,21 +9,28 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0d0d1a"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.chirohero.app"
     },
     "android": {
+      "package": "com.chirohero.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0d0d1a",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "ChiroHero - Quiropractico",
+      "short_name": "ChiroHero",
+      "description": "Aprende quiropractica jugando - Juego de clinica quiropractica",
+      "theme_color": "#1a1a2e",
+      "background_color": "#0d0d1a"
     }
   }
 }

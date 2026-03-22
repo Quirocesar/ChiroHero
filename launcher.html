@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChiroHero - Launcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0d0d1a;
+      --bg-medium: #1a1a2e;
+      --primary: #e94560;
+      --primary-light: #ff6b8a;
+      --accent: #00b4d8;
+      --accent-light: #48cae4;
+      --gold: #f4d35e;
+      --gold-light: #ffe48a;
+      --green: #06d6a0;
+      --white: #edf2f4;
+      --gray: #8d99ae;
+      --gray-dark: #5c6577;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: var(--bg-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: var(--white);
+      border-radius: 50%;
+      animation: twinkle 2s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 1px;
+      animation: float-up 8s infinite linear;
+    }
+
+    @keyframes float-up {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bone-icon {
+      font-size: 40px;
+      animation: bounce 2s infinite ease-in-out;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .title-main {
+      font-size: 28px;
+      color: var(--primary);
+      text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 40px var(--primary);
+      letter-spacing: 3px;
+      animation: glow-pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary); }
+      50% { text-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary), 0 0 60px var(--primary); }
+    }
+
+    .title-sub {
+      font-size: 14px;
+      color: var(--accent);
+      margin-top: 8px;
+      letter-spacing: 4px;
+      text-shadow: 0 0 10px var(--accent);
+    }
+
+    .subtitle {
+      font-size: 8px;
+      color: var(--gold);
+      margin-top: 15px;
+      opacity: 0.8;
+    }
+
+    .spine {
+      display: flex;
+      gap: 6px;
+      margin: 20px 0;
+      justify-content: center;
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .vertebra {
+      width: 20px;
+      height: 8px;
+      border-radius: 2px;
+      animation: spine-glow 1.5s infinite ease-in-out alternate;
+    }
+
+    .vertebra:nth-child(odd) {
+      background: var(--white);
+      box-shadow: 0 0 5px var(--white);
+    }
+
+    .vertebra:nth-child(even) {
+      background: var(--accent);
+      box-shadow: 0 0 5px var(--accent);
+    }
+
+    @keyframes spine-glow {
+      from { opacity: 0.5; transform: scaleY(1); }
+      to { opacity: 1; transform: scaleY(1.1); }
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 300px;
+      animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      padding: 18px 30px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-play {
+      background: var(--gold);
+      color: var(--bg-dark);
+      box-shadow: 0 4px 0 var(--gold-light), 0 6px 20px rgba(244, 211, 94, 0.4);
+    }
+
+    .btn-play:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--gold-light), 0 10px 30px rgba(244, 211, 94, 0.5);
+    }
+
+    .btn-play:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--gold-light), 0 4px 10px rgba(244, 211, 94, 0.4);
+    }
+
+    .btn-continue {
+      background: var(--green);
+      color: var(--bg-dark);
+      box-shadow: 0 4px 0 #049e75, 0 6px 20px rgba(6, 214, 160, 0.4);
+      display: none;
+    }
+
+    .btn-continue:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #049e75, 0 10px 30px rgba(6, 214, 160, 0.5);
+    }
+
+    .language-section {
+      margin-top: 30px;
+      text-align: center;
+      animation: fadeIn 2s ease-out;
+    }
+
+    .language-label {
+      font-size: 8px;
+      color: var(--gray);
+      margin-bottom: 10px;
+    }
+
+    .languages {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .lang-btn {
+      background: var(--bg-medium);
+      border: 2px solid var(--gray-dark);
+      color: var(--white);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn:hover, .lang-btn.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      background: var(--accent);
+      color: var(--bg-dark);
+    }
+
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      animation: fadeIn 2.5s ease-out;
+    }
+
+    .version {
+      font-size: 8px;
+      color: var(--gray-dark);
+    }
+
+    .credits {
+      font-size: 6px;
+      color: var(--gray-dark);
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+
+    .error-msg {
+      background: var(--primary);
+      color: var(--white);
+      padding: 15px;
+      border-radius: 4px;
+      font-size: 8px;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .error-msg.show {
+      display: block;
+    }
+
+    .loading {
+      display: none;
+      color: var(--gold);
+      font-size: 10px;
+      margin-top: 10px;
+      animation: blink 1s infinite;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @media (max-width: 480px) {
+      .title-main { font-size: 20px; }
+      .title-sub { font-size: 10px; }
+      .btn { font-size: 10px; padding: 15px 20px; }
+      .languages { gap: 5px; }
+      .lang-btn { font-size: 6px; padding: 6px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="starfield"></div>
+
+  <div class="container">
+    <div class="logo">
+      <span class="bone-icon">🦴</span>
+      <h1 class="title-main">CHIROHERO</h1>
+      <p class="title-sub">CLINIC SIMULATOR</p>
+      <p class="subtitle" id="subTitle">Aprende quiropráctica jugando</p>
+    </div>
+
+    <div class="spine">
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+      <div class="vertebra"></div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-play" id="btnPlay" onclick="playGame()">
+        ⚔️ JUGAR ⚔️
+      </button>
+      <button class="btn btn-continue" id="btnContinue" onclick="continueGame()">
+        🔄 CONTINUAR
+      </button>
+    </div>
+
+    <p class="loading" id="loading">CARGANDO...</p>
+
+    <div class="error-msg" id="errorMsg">
+      ⚠️ ¡Error! Ejecuta "build-pwa.bat" primero<br>
+      para generar la carpeta "dist"
+    </div>
+
+    <div class="language-section">
+      <p class="language-label">🌐 IDIOMA / LANGUAGE</p>
+      <div class="languages">
+        <button class="lang-btn active" data-lang="es" onclick="setLang('es')">ES</button>
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" data-lang="pt" onclick="setLang('pt')">PT</button>
+        <button class="lang-btn" data-lang="it" onclick="setLang('it')">IT</button>
+        <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn" data-lang="de" onclick="setLang('de')">DE</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p class="version">v4.0 - ChiroHero</p>
+      <p class="credits">Made with ❤️ | Educational Game</p>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+      es: {
+        play: '⚔️ JUGAR ⚔️',
+        continue: '🔄 CONTINUAR',
+        subtitle: 'Aprende quiropráctica jugando',
+        loading: 'CARGANDO...',
+        error: '⚠️ ¡Error! Ejecuta "build-pwa.bat" primero para generar la carpeta "dist"',
+        version: 'v4.0 - ChiroHero'
+      },
+      en: {
+        play: '⚔️ PLAY ⚔️',
+        continue: '🔄 CONTINUE',
+        subtitle: 'Learn chiropractic by playing',
+        loading: 'LOADING...',
+        error: '⚠️ Error! Run "build-pwa.bat" first to generate the "dist" folder',
+        version: 'v4.0 - ChiroHero'
+      },
+      pt: {
+        play: '⚔️ JOGAR ⚔️',
+        continue: '🔄 CONTINUAR',
+        subtitle: 'Aprenda quiroprática jogando',
+        loading: 'CARREGANDO...',
+        error: '⚠️ Erro! Execute "build-pwa.bat" primeiro para gerar a pasta "dist"',
+        version: 'v4.0 - ChiroHero'
+      },
+      it: {
+        play: '⚔️ GIOCA ⚔️',
+        continue: '🔄 CONTINUA',
+        subtitle: 'Impara la chiropratica giocando',
+        loading: 'CARICAMENTO...',
+        error: '⚠️ Errore! Esegui "build-pwa.bat" prima per generare la cartella "dist"',
+        version: 'v4.0 - ChiroHero'
+      },
+      fr: {
+        play: '⚔️ JOUER ⚔️',
+        continue: '🔄 CONTINUER',
+        subtitle: 'Apprenez la chiropratique en jouant',
+        loading: 'CHARGEMENT...',
+        error: '⚠️ Erreur! Exécutez "build-pwa.bat" d\'abord pour générer le dossier "dist"',
+        version: 'v4.0 - ChiroHero'
+      },
+      de: {
+        play: '⚔️ SPIELEN ⚔️',
+        continue: '🔄 FORTSETZEN',
+        subtitle: 'Chiropraktik spielend lernen',
+        loading: 'LADEN...',
+        error: '⚠️ Fehler! Führen Sie zuerst "build-pwa.bat" aus, um den Ordner "dist" zu erstellen',
+        version: 'v4.0 - ChiroHero'
+      }
+    };
+
+    let currentLang = 'es';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createStarfield();
+      checkSavedGame();
+      detectLanguage();
+      checkGameExists();
+    });
+
+    function createStarfield() {
+      const starfield = document.getElementById('starfield');
+      const starCount = 50;
+      
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = (Math.random() * 2 + 1) + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 2 + 's';
+        starfield.appendChild(star);
+      }
+
+      const colors = ['#f4d35e', '#00b4d8', '#e94560', '#06d6a0'];
+      for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 8 + 's';
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        starfield.appendChild(particle);
+      }
+    }
+
+    function detectLanguage() {
+      const browserLang = navigator.language.split('-')[0];
+      const supportedLangs = ['es', 'en', 'pt', 'it', 'fr', 'de'];
+      
+      const savedLang = localStorage.getItem('chirohero_lang');
+      if (savedLang && supportedLangs.includes(savedLang)) {
+        setLang(savedLang);
+        return;
+      }
+
+      if (supportedLangs.includes(browserLang)) {
+        setLang(browserLang);
+      } else {
+        setLang('es');
+      }
+    }
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('chirohero_lang', lang);
+      
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+
+      const t = translations[lang];
+      document.getElementById('btnPlay').textContent = t.play;
+      document.getElementById('btnContinue').textContent = t.continue;
+      document.getElementById('subTitle').textContent = t.subtitle;
+      document.getElementById('loading').textContent = t.loading;
+      document.getElementById('errorMsg').innerHTML = t.error;
+      document.querySelector('.version').textContent = t.version;
+      document.documentElement.lang = lang;
+    }
+
+    function checkSavedGame() {
+      try {
+        const saves = localStorage.getItem('chirohero_saves');
+        if (saves) {
+          const saveData = JSON.parse(saves);
+          if (saveData && saveData.length > 0) {
+            const hasData = saveData.some(save => save && save.data && save.data.money !== undefined);
+            if (hasData) {
+              document.getElementById('btnContinue').style.display = 'block';
+            }
+          }
+        }
+      } catch (e) {
+        console.log('No saves found');
+      }
+    }
+
+    async function checkGameExists() {
+      try {
+        const response = await fetch('dist/index.html', { method: 'HEAD' });
+        if (!response.ok) {
+          showError();
+        }
+      } catch (e) {
+        try {
+          const altResponse = await fetch('./dist/index.html', { method: 'HEAD' });
+          if (!altResponse.ok) {
+            showError();
+          }
+        } catch (e2) {
+          showError();
+        }
+      }
+    }
+
+    function showError() {
+      document.getElementById('errorMsg').classList.add('show');
+    }
+
+    function playGame() {
+      const loading = document.getElementById('loading');
+      loading.classList.add('show');
+      localStorage.setItem('chirohero_newgame', 'true');
+      setTimeout(() => {
+        window.location.href = 'dist/index.html';
+      }, 500);
+    }
+
+    function continueGame() {
+      const loading = document.getElementById('loading');
+      loading.classList.add('show');
+      localStorage.setItem('chirohero_newgame', 'false');
+      setTimeout(() => {
+        window.location.href = 'dist/index.html';
+      }, 500);
+    }
+  </script>
+</body>
+</html>
