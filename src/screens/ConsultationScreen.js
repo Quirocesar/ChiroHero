@@ -11,6 +11,7 @@ import gameState from '../utils/gameState';
 import { t } from '../utils/i18n';
 import { getCADialogue } from '../data/staff';
 import { shouldTriggerNeuroTest } from '../data/neuroTests';
+import { randomFrom } from '../data/patientPersonalities';
 import TutorialTarget from '../components/TutorialTarget';
 
 // Lazy-load mini-game components (they may not exist yet during development)
@@ -41,6 +42,12 @@ export default function ConsultationScreen({ route, navigation }) {
   }, []);
 
   const [showManualModal, setShowManualModal] = useState(false);
+
+  // Personality dialogue
+  const [greeting] = useState(() =>
+    patient.personality ? randomFrom(patient.personality.greetings) : null
+  );
+  const [personalityReaction, setPersonalityReaction] = useState(null);
 
   // Check if neuro test should trigger
   const needsNeuroTest = useMemo(() => {
@@ -91,6 +98,9 @@ export default function ConsultationScreen({ route, navigation }) {
     if (patient.isReferralCase) {
       soundManager.playError();
       setDecision('wrong_treat');
+      if (patient.personality) {
+        setPersonalityReaction(randomFrom(patient.personality.reactions.angry));
+      }
       if (gameState.hasCA()) {
         setTimeout(() => {
           soundManager.playCASpeak();
@@ -115,6 +125,9 @@ export default function ConsultationScreen({ route, navigation }) {
     if (patient.isReferralCase) {
       soundManager.playSuccess();
       setDecision('correct_refer');
+      if (patient.personality) {
+        setPersonalityReaction(randomFrom(patient.personality.reactions.happy));
+      }
       if (gameState.hasCA()) {
         setTimeout(() => {
           soundManager.playCASpeak();
@@ -124,6 +137,9 @@ export default function ConsultationScreen({ route, navigation }) {
     } else {
       soundManager.playRefer();
       setDecision('wrong_refer');
+      if (patient.personality) {
+        setPersonalityReaction(randomFrom(patient.personality.reactions.angry));
+      }
       if (gameState.hasCA()) {
         setTimeout(() => {
           soundManager.playCASpeak();
@@ -256,6 +272,16 @@ export default function ConsultationScreen({ route, navigation }) {
         </View>
       )}
 
+      {/* Personality greeting */}
+      {greeting && phase === 'soap' && !decision && (
+        <PixelCard color={COLORS.bgLight} borderColor={COLORS.primary} style={styles.speechBubble}>
+          <PixelText size="small" color={COLORS.white}>&quot;{greeting}&quot;</PixelText>
+          <PixelText size="tiny" color={COLORS.gray} style={{ marginTop: 4 }}>
+            — {patient.personality.nameTag}
+          </PixelText>
+        </PixelCard>
+      )}
+
       {/* SOAP Report */}
       {!decision && (
         <TutorialTarget id="soapCard">
@@ -355,6 +381,16 @@ export default function ConsultationScreen({ route, navigation }) {
         <PixelCard color={COLORS.paper} borderColor={COLORS.accent}>
           <PixelText size="small" color={COLORS.ink} shadow={false}>
             👩‍⚕️ {t('caName')}: {caMessage}
+          </PixelText>
+        </PixelCard>
+      )}
+
+      {/* Personality reaction after decision */}
+      {personalityReaction && decision && (
+        <PixelCard color={COLORS.bgLight} borderColor={COLORS.primary} style={styles.speechBubble}>
+          <PixelText size="small" color={COLORS.white}>&quot;{personalityReaction}&quot;</PixelText>
+          <PixelText size="tiny" color={COLORS.gray} style={{ marginTop: 4 }}>
+            — {patient.personality.nameTag}
           </PixelText>
         </PixelCard>
       )}
@@ -538,6 +574,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 2,
+  },
+  speechBubble: {
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
   },
   miniGameButtons: {
     flexDirection: 'row',
