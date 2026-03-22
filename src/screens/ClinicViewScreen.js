@@ -30,6 +30,12 @@ import {
   buildDailyMemorableMoments,
 } from '../engines/dailyRunEngine';
 import { resolveMonthlyCloseIfNeeded } from '../engines/dayCloseEngine';
+import DayTransition from '../components/DayTransition';
+import { rollDailyEvent } from '../data/clinicEvents';
+import { getRandomReview } from '../data/patientReviews';
+import { screenShake, pulseScale } from '../utils/juiceEffects';
+import PixelText from '../components/PixelText';
+import PixelCard from '../components/PixelCard';
 
 // Sub-components
 import ClinicHud from '../components/ClinicHud';
@@ -132,6 +138,16 @@ export default function ClinicViewScreen({ navigation, route }) {
     bad: 0,
     qualityTotal: 0,
   });
+
+  // Fun systems
+  const [comboCount, setComboCount] = useState(0);
+  const [showDayTransition, setShowDayTransition] = useState(false);
+  const [dailyEvent, setDailyEvent] = useState(null);
+  const [reviewToast, setReviewToast] = useState(null);
+  const [shakeAnim] = useState(new Animated.Value(0));
+  const [moneyPulseAnim] = useState(new Animated.Value(1));
+  const reviewToastAnim = useRef(new Animated.Value(300)).current;
+  const reviewTimerRef = useRef(null);
 
   const upgrades = gameState.get('upgrades') || {};
   const clinicUpgrades = gameState.get('clinicUpgrades') || {
@@ -315,6 +331,26 @@ export default function ClinicViewScreen({ navigation, route }) {
       useNativeDriver: true,
     }).start();
   }, [walkAnim]);
+
+  // Show a patient review toast that slides in from right
+  const showReviewToast = useCallback((review) => {
+    if (reviewTimerRef.current) clearTimeout(reviewTimerRef.current);
+    setReviewToast(review);
+    reviewToastAnim.setValue(300);
+    Animated.spring(reviewToastAnim, {
+      toValue: 0,
+      friction: 8,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+    reviewTimerRef.current = setTimeout(() => {
+      Animated.timing(reviewToastAnim, {
+        toValue: 300,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setReviewToast(null));
+    }, 4000);
+  }, [reviewToastAnim]);
 
   const getTargetPatientsForDay = useCallback(() => {
     if (isWalmerTutorial) {
@@ -566,7 +602,26 @@ export default function ClinicViewScreen({ navigation, route }) {
     setShowEndOfDayReport(false);
     setDayReport(null);
     setPatientExpression('worried');
+    setComboCount(0);
     soundManager.playPatientEnter();
+
+    // Show day transition animation
+    setShowDayTransition(true);
+
+    // Roll for random fun clinic event
+    const funEvent = rollDailyEvent(gameState.get('currentDay') || 1);
+    if (funEvent) {
+      setDailyEvent(funEvent);
+      // Apply event bonuses
+      if (funEvent.effect.moneyBonus) {
+        gameState.earnMoney(funEvent.effect.moneyBonus);
+      }
+      if (funEvent.effect.reputationBonus) {
+        gameState.updateReputation(funEvent.effect.reputationBonus);
+      }
+    } else {
+      setDailyEvent(null);
+    }
 
     // Start day timer
     const dayDuration = isWalmerTutorial ? 120 : 240;
@@ -762,6 +817,29 @@ export default function ClinicViewScreen({ navigation, route }) {
 
         gameState.addSatisfiedPatient(patient.fullName);
 
+        // Combo system
+        setComboCount(prev => {
+          const newCombo = prev + 1;
+          if (newCombo >= 2) {
+            soundManager.playComboUp?.(newCombo);
+          }
+          if (newCombo >= 5) {
+            soundManager.playCelebration?.();
+          }
+          return newCombo;
+        });
+
+        // Juice effects
+        pulseScale(moneyPulseAnim);
+        if (qualityTier === 'Good') {
+          screenShake(shakeAnim, 6);
+          soundManager.playPerfectTreatment?.();
+        }
+
+        // Patient review toast
+        const review = getRandomReview(qualityScore, patient.fullName);
+        showReviewToast(review);
+
         setMoneyParticlesActive(true);
         setPreviousEarnings(earnings);
         setTimeout(() => setMoneyParticlesActive(false), 2500);
@@ -784,6 +862,10 @@ export default function ClinicViewScreen({ navigation, route }) {
           dailyMistakes: (gameState.get('dailyMistakes') || 0) + 1,
         });
         setPatientExpression('pain');
+        // Break combo
+        if (comboCount >= 2) soundManager.playComboBreak?.();
+        setComboCount(0);
+        screenShake(shakeAnim, 12);
       } else if (result === 'wrong_refer') {
         earnings = 0;
         gameState.updateReputation(-3);
@@ -791,6 +873,9 @@ export default function ClinicViewScreen({ navigation, route }) {
           dailyMistakes: (gameState.get('dailyMistakes') || 0) + 1,
         });
         setPatientExpression('worried');
+        // Break combo
+        if (comboCount >= 2) soundManager.playComboBreak?.();
+        setComboCount(0);
       }
 
       setDayMetrics((prev) => {
@@ -1216,8 +1301,51 @@ export default function ClinicViewScreen({ navigation, route }) {
 
   // Render
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { transform: [{ translateX: shakeAnim }] }]}>
       <FloatingMoneyParticles active={moneyParticlesActive} amount={previousEarnings} />
+
+      {/* Day transition overlay */}
+      <DayTransition
+        day={state.currentDay || 1}
+        visible={showDayTransition}
+        onDone={() => setShowDayTransition(false)}
+      />
+
+      {/* Daily event notification */}
+      {dailyEvent && dayStarted && !dayEnded && (
+        <View style={styles.eventBanner}>
+          <PixelText size="small" color={COLORS.white} center>
+            {dailyEvent.title}
+          </PixelText>
+          <PixelText size="tiny" color={COLORS.gray} center>
+            {dailyEvent.description}
+          </PixelText>
+        </View>
+      )}
+
+      {/* Combo counter */}
+      {comboCount >= 2 && dayStarted && !dayEnded && (
+        <View style={styles.comboBadge}>
+          <PixelText size="medium" color={comboCount >= 10 ? COLORS.gold : comboCount >= 5 ? COLORS.accent : COLORS.primary} center glow>
+            {comboCount >= 10 ? '🔥' : comboCount >= 5 ? '⚡' : '✨'} {comboCount}x COMBO
+          </PixelText>
+        </View>
+      )}
+
+      {/* Patient review toast */}
+      {reviewToast && (
+        <Animated.View style={[styles.reviewToast, { transform: [{ translateX: reviewToastAnim }] }]}>
+          <PixelText size="tiny" color={COLORS.gold}>
+            {'★'.repeat(reviewToast.stars)}{'☆'.repeat(5 - reviewToast.stars)}
+          </PixelText>
+          <PixelText size="tiny" color={COLORS.white} style={styles.reviewText}>
+            "{reviewToast.text}"
+          </PixelText>
+          <PixelText size="tiny" color={COLORS.gray}>
+            — {reviewToast.author}
+          </PixelText>
+        </Animated.View>
+      )}
 
       {/* HUD bar */}
       <View style={styles.hudWrap}>
@@ -1457,7 +1585,7 @@ export default function ClinicViewScreen({ navigation, route }) {
         dayReport={dayReport}
         onContinue={() => setShowEndOfDayReport(false)}
       />
-    </View>
+    </Animated.View>
   );
 }
 
@@ -1581,5 +1709,46 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '800',
+  },
+  // Fun system styles
+  eventBanner: {
+    position: 'absolute',
+    top: 100,
+    left: 16,
+    right: 16,
+    backgroundColor: COLORS.bgLight,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderRadius: 12,
+    padding: 12,
+    zIndex: 50,
+  },
+  comboBadge: {
+    position: 'absolute',
+    top: 60,
+    right: 12,
+    backgroundColor: COLORS.bgLight + 'DD',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    zIndex: 50,
+  },
+  reviewToast: {
+    position: 'absolute',
+    bottom: 120,
+    right: 12,
+    width: 220,
+    backgroundColor: COLORS.bgLight,
+    borderWidth: 1,
+    borderColor: COLORS.gold + '60',
+    borderRadius: 12,
+    padding: 10,
+    zIndex: 50,
+  },
+  reviewText: {
+    marginVertical: 4,
+    fontStyle: 'italic',
   },
 });

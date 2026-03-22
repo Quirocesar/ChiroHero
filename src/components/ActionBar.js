@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { COLORS } from '../utils/theme';
 import PixelButton from './PixelButton';
@@ -10,6 +10,21 @@ import gameState from '../utils/gameState';
 import TutorialTarget from './TutorialTarget';
 import soundManager from '../utils/soundManager';
 import { t } from '../utils/i18n';
+
+const TOMORROW_TEASERS = [
+  'Un paciente VIP ha pedido cita para mañana...',
+  'Mañana puede ser tu mejor día. ¿Estás preparado?',
+  'Hay rumores de una inspección sanitaria...',
+  'Tu rival ha abierto una clínica al lado. Mañana verás...',
+  'Un paciente misterioso quiere verte mañana...',
+  'Tu CA dice que mañana será "interesante"...',
+  'Mañana viene un paciente que no para de hablar de CrossFit...',
+  'Alguien dejó una reseña de 1 estrella. Mañana tocará mejorar...',
+  '¿Preparado para el día más loco de tu carrera?',
+  'Mañana llegan más pacientes. Esperemos que paguen...',
+  'Tu fama crece. Mañana habrá cola en la puerta.',
+  'Un influencer quiere grabar tu próximo ajuste...',
+];
 
 // ── Queue progress bar ───────────────────────────────────────
 function QueueBar({ patients, currentPatientIndex, pulseAnim }) {
@@ -618,6 +633,16 @@ export default function ActionBar({
               displayEarnings={displayEarnings}
             />
 
+            {/* Tomorrow teaser — "one more day" hook */}
+            <View style={styles.teaserCard}>
+              <PixelText size="tiny" color={COLORS.primary} style={styles.teaserEmoji}>
+                🔮
+              </PixelText>
+              <PixelText size="tiny" color={COLORS.grayLight} center style={styles.teaserItalic}>
+                {TOMORROW_TEASERS[Math.floor(Math.random() * TOMORROW_TEASERS.length)]}
+              </PixelText>
+            </View>
+
             <PixelButton
               title={t('nextDay')}
               icon=">"
@@ -803,5 +828,20 @@ const styles = StyleSheet.create({
   },
   loanPayButton: {
     marginTop: 4,
+  },
+  teaserCard: {
+    backgroundColor: COLORS.primary + '15',
+    borderWidth: 1,
+    borderColor: COLORS.primary + '40',
+    borderRadius: 10,
+    padding: 10,
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  teaserEmoji: {
+    marginBottom: 4,
+  },
+  teaserItalic: {
+    fontStyle: 'italic',
   },
 });

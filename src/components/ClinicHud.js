@@ -134,9 +134,12 @@ export default function ClinicHud({
             {reputationInfo.title}
           </PixelText>
           {streakInfo.streak > 0 && (
-            <View style={styles.streakBadge}>
-              <PixelText size="tiny" color={COLORS.orange} fontFamily="mono">
-                x{streakInfo.streak}
+            <View style={[
+              styles.streakBadge,
+              streakInfo.streak >= 10 && styles.streakBadgeHot,
+            ]}>
+              <PixelText size="tiny" color={streakInfo.streak >= 10 ? COLORS.gold : streakInfo.streak >= 5 ? COLORS.orange : COLORS.primary} fontFamily="mono">
+                {streakInfo.streak >= 10 ? '🔥' : streakInfo.streak >= 5 ? '⚡' : '✨'} x{streakInfo.streak}
               </PixelText>
             </View>
           )}
@@ -237,10 +240,16 @@ const styles = StyleSheet.create({
   },
   streakBadge: {
     marginLeft: 4,
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    backgroundColor: COLORS.orange + '44',
-    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: COLORS.primary + '33',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '55',
+  },
+  streakBadgeHot: {
+    backgroundColor: COLORS.gold + '33',
+    borderColor: COLORS.gold + '66',
   },
 });
 
