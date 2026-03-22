@@ -168,11 +168,79 @@ const CA_DIALOGUES = {
   referral: ['caReferral', 'caReferral2', 'caReferral3', 'caReferral4'],
   wrongReferral: ['caWrongRefer'],
   endDay: ['caEndDay', 'caEndDay2', 'caEndDay3', 'caEndDay4', 'caEndDay5', 'caEndDay6', 'caEndDay7'],
+
+  // Perfect treatment reactions (after player does perfectly)
+  CA_PERFECT: [
+    '\u00a1Incre\u00edble! Casi tan bueno como yo lo har\u00eda... casi.',
+    '\u00bfHas practicado con un maniqu\u00ed? Porque eso fue perfecto.',
+    'Toma nota... ah espera, yo tomo las notas. Impresionante.',
+    'Si sigues as\u00ed voy a pedir un aumento.',
+    'Tratamiento perfecto. \u00bfQui\u00e9n eres y qu\u00e9 hiciste con el doctor?',
+  ],
+
+  // Failed treatment reactions
+  CA_FAIL: [
+    'Bueno... al menos no lo mataste. La barra estaba baja.',
+    '\u00bfLe devolvemos el dinero o solo un caramelo?',
+    'Mi abuela tratar\u00eda mejor... y ella no es quiropr\u00e1ctica.',
+    'Eso fue... educativo. Para ambos.',
+    'Mira el lado positivo: ahora sabes qu\u00e9 NO hacer.',
+  ],
+
+  // Combo streak comments
+  CA_COMBO: [
+    '\u00a1Racha de {combo}! \u00bfEst\u00e1s en llamas o llamo a los bomberos?',
+    '{combo} seguidos. A este ritmo me quedo sin exclamaciones.',
+    '\u00a1{combo}x combo! Los pacientes hacen fila para que los atiendas.',
+    'Racha de {combo}. Empiezo a creer en ti.',
+  ],
+
+  // Morning greetings (expanded, one shown per day start)
+  CA_MORNING: [
+    'Buenos d\u00edas, jefe. Los pacientes ya huelen el caf\u00e9.',
+    'Otro d\u00eda, otra espalda. \u00bfListo para crujir?',
+    'He organizado los expedientes... es broma, est\u00e1n donde los dejaste.',
+    'Buen d\u00eda. Tu primer paciente ya est\u00e1 quej\u00e1ndose en la sala.',
+    'Hoy presiento un gran d\u00eda. O al menos uno sin demandas.',
+    'El caf\u00e9 est\u00e1 listo. Tu agenda tambi\u00e9n... m\u00e1s o menos.',
+  ],
+
+  // End of day comments
+  CA_END_DAY: [
+    'Buen d\u00eda. Ahora a descansar... esas manos lo merecen.',
+    'D\u00eda terminado. La cl\u00ednica sigue en pie, eso es bueno.',
+    'Los pacientes se fueron contentos. Bueno, la mayor\u00eda.',
+    'Otro d\u00eda exitoso. O al menos no catastr\u00f3fico.',
+    'Hora de cerrar. \u00bfPizza para celebrar?',
+  ],
+
+  // When clinic is empty (no patients)
+  CA_EMPTY: [
+    '\u00bfHola? \u00bfHay alguien? Solo nosotros y el silencio.',
+    'Cero pacientes. \u00bfHacemos cara o cruz para ver qui\u00e9n limpia?',
+    'La sala de espera est\u00e1 vac\u00eda. Como mi vida social.',
+  ],
+
+  // Money milestone comments
+  CA_MONEY: [
+    '\u00a1Ka-ching! El sonido m\u00e1s bonito del mundo.',
+    'Dinero entrando. M\u00fasica para mis o\u00eddos.',
+    '\u00bfYa somos ricos? \u00bfNo? Seguimos entonces.',
+  ],
 };
 
-export function getCADialogue(type) {
+export function getCADialogue(type, params) {
   const options = CA_DIALOGUES[type] || CA_DIALOGUES.greetings;
-  return options[Math.floor(Math.random() * options.length)];
+  let message = options[Math.floor(Math.random() * options.length)];
+
+  // Replace template placeholders with params values
+  if (params) {
+    Object.keys(params).forEach((key) => {
+      message = message.replace(new RegExp(`\\{${key}\\}`, 'g'), params[key]);
+    });
+  }
+
+  return message;
 }
 
 // Generate online bookings for the day
