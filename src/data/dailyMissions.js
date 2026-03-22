@@ -9,6 +9,12 @@ const MISSION_TYPES = [
     id: 'treat_patients',
     nameTemplate: 'Atiende {count} pacientes',
     description: 'Treat a certain number of patients today',
+    flavorTexts: [
+      'Los pacientes no se tratan solos... aunque a veces lo intentan',
+      'Hay gente con dolor de espalda esperando por ti',
+      'Cada paciente es una espalda nueva por crujir',
+      'Tu sala de espera parece la cola del supermercado',
+    ],
     parameters: ['count'],
     generate: (day, skillLevel) => {
       const targetCount = Math.min(3 + Math.floor(skillLevel / 3), 8);
@@ -24,6 +30,12 @@ const MISSION_TYPES = [
     id: 'earn_money',
     nameTemplate: 'Gana ${amount}',
     description: 'Earn a certain amount of money today',
+    flavorTexts: [
+      'El alquiler no se paga solo',
+      'Tu cuenta bancaria llora de alegría',
+      'Dinero bien ganado... crujiendo espaldas',
+      'Hoy toca llenar la hucha vertebral',
+    ],
     parameters: ['amount'],
     generate: (day, skillLevel) => {
       const targetAmount = 300 + day * 20 + skillLevel * 50;
@@ -39,6 +51,11 @@ const MISSION_TYPES = [
     id: 'perfect_treatment',
     name: 'No cometas errores',
     description: 'Complete treatments without mistakes today',
+    flavorTexts: [
+      'Cero errores. Como un cirujano... pero con más cracks',
+      'La perfección no existe... ¿o sí?',
+      'Hoy no hay margen de error. Presión, ¿qué presión?',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: Math.min(2 + Math.floor(skillLevel / 4), 5),
@@ -50,6 +67,11 @@ const MISSION_TYPES = [
     id: 'use_tool',
     nameTemplate: 'Usa herramienta {count} veces',
     description: 'Use a specific tool today',
+    flavorTexts: [
+      'Un buen quiropráctico conoce sus herramientas',
+      'Las herramientas no se usan solas... todavía',
+      'Hora de sacar el arsenal quiropráctico',
+    ],
     parameters: ['toolId'],
     generate: (day, skillLevel) => {
       const tools = ['activator', 'massageGun', 'ultrasound', 'tens'];
@@ -68,6 +90,11 @@ const MISSION_TYPES = [
     id: 'refer_cases',
     nameTemplate: 'Deriva {count} pacientes',
     description: 'Correctly refer patients with red flags today',
+    flavorTexts: [
+      'A veces la valentía es saber cuándo NO tratar',
+      'Derivar también es curar... filosofía quiropráctica',
+      'No todo paciente es para ti, y está bien',
+    ],
     parameters: [],
     generate: (day, skillLevel) => {
       const targetCount = Math.min(1 + Math.floor(skillLevel / 5), 3);
@@ -83,6 +110,11 @@ const MISSION_TYPES = [
     id: 'vip_patient',
     name: 'Atiende paciente VIP',
     description: 'Treat a VIP patient today',
+    flavorTexts: [
+      'Hoy viene alguien importante. No la pifies',
+      'Paciente VIP detectado. Ponte la bata buena',
+      'Los famosos también tienen dolor de espalda',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: 1,
@@ -95,6 +127,11 @@ const MISSION_TYPES = [
     id: 'difficulty_challenge',
     name: 'Tratamientos difíciles',
     description: 'Treat patients with difficult conditions',
+    flavorTexts: [
+      'Los casos fáciles son para principiantes',
+      'Hoy toca sudar la bata. Casos complicados al frente',
+      'Si fuera fácil, cualquiera sería quiropráctico',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: Math.min(1 + Math.floor(skillLevel / 4), 3),
@@ -106,6 +143,11 @@ const MISSION_TYPES = [
     id: 'speed_treatment',
     name: 'Tratamiento rápido',
     description: 'Complete treatments within time limit',
+    flavorTexts: [
+      'Rápido pero bien. Bueno, sobre todo rápido',
+      'El reloj corre y las espaldas no esperan',
+      'Velocidad y precisión: el combo del quiropráctico ninja',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: Math.min(2 + Math.floor(skillLevel / 3), 5),
@@ -117,6 +159,11 @@ const MISSION_TYPES = [
     id: 'combo_mission',
     nameTemplate: 'Encadena {count} combos',
     description: 'Get a combo streak during treatments',
+    flavorTexts: [
+      '¡Esto no es un juego! Ah, espera, sí lo es',
+      'Combo tras combo. Tus dedos están en llamas',
+      'Encadena ajustes como si fuera un videojuego... que lo es',
+    ],
     parameters: [],
     generate: (day, skillLevel) => {
       const targetCount = Math.min(3 + Math.floor(skillLevel / 2), 8);
@@ -132,6 +179,11 @@ const MISSION_TYPES = [
     id: 'zone_expert',
     name: 'Experto en zona',
     description: 'Treat all zones in a single session',
+    flavorTexts: [
+      'De la cervical al lumbar, hoy toca recorrido completo',
+      'Conoce cada zona como la palma de tu mano',
+      'Tour completo por la columna. Sin paradas',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: 4,
@@ -143,6 +195,11 @@ const MISSION_TYPES = [
     id: 'no_referrals',
     name: 'Sin derivaciones',
     description: 'Complete all treatments without referring patients',
+    flavorTexts: [
+      'Hoy los resuelves todos tú solito',
+      'Sin derivaciones. Todo pasa por tus manos',
+      'Eres el principio y el fin del tratamiento',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: Math.min(2 + Math.floor(skillLevel / 3), 4),
@@ -154,6 +211,11 @@ const MISSION_TYPES = [
     id: 'special_patient',
     name: 'Paciente especial',
     description: 'Treat a patient with a special condition',
+    flavorTexts: [
+      'Este paciente es... diferente. Buena suerte',
+      'Caso especial detectado. Ajusta tu estrategia',
+      'No todos los días llega alguien así a tu consulta',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: 1,
@@ -165,6 +227,11 @@ const MISSION_TYPES = [
     id: 'clinic_upgrade',
     name: 'Mejora tu clínica',
     description: 'Purchase an upgrade for your clinic',
+    flavorTexts: [
+      'Tu clínica necesita un lavado de cara',
+      'Invertir en tu clínica es invertir en espaldas felices',
+      'Hora de gastar esos ahorros en algo útil',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetCount: 1,
@@ -176,6 +243,11 @@ const MISSION_TYPES = [
     id: 'earn_reputation',
     name: 'Gana reputación',
     description: 'Earn reputation points today',
+    flavorTexts: [
+      'La fama no se construye sola... o sí, si eres bueno',
+      'Haz que hablen bien de ti. O al menos que hablen',
+      'Reputación: lo que te separa de ser "ese raro que cruje cosas"',
+    ],
     parameters: [],
     generate: (day, skillLevel) => ({
       targetAmount: 10 + day * 2 + skillLevel * 5,
