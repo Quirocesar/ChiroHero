@@ -114,8 +114,8 @@ class SoundManager {
 
   playPatientHappy() {
     this.init();
-    [523, 659, 784, 1047, 784, 1047].forEach((freq, i) => {
-      this.playTone(freq, 0.1, 'square', 0.08, i * 0.08);
+    [523, 659, 784].forEach((freq, i) => {
+      this.playTone(freq, 0.1, 'triangle', 0.08, i * 0.08);
     });
   }
 
@@ -258,6 +258,72 @@ class SoundManager {
     [440, 554, 659, 880, 1047].forEach((freq, i) => {
       this.playTone(freq, 0.08, 'square', 0.1 * vol, i * 0.06);
     });
+  }
+
+  playComboUp(comboLevel) {
+    this.init();
+    const baseFreq = 400 + (comboLevel * 50);
+    [0, 200, 400].forEach((freq, i) => {
+      this.playTone(baseFreq + freq, 0.08, 'square', 0.08, i * 0.06);
+    });
+  }
+
+  playComboBreak() {
+    this.init();
+    // Sad descending trombone
+    [400, 350, 300, 200].forEach((freq, i) => {
+      this.playTone(freq, 0.2, 'sawtooth', 0.1, i * 0.15);
+    });
+  }
+
+  playPerfectTreatment() {
+    this.init();
+    // Triumphant fanfare
+    [523, 659, 784, 1047, 1319].forEach((freq, i) => {
+      this.playTone(freq, 0.15, 'square', 0.08, i * 0.1);
+    });
+    // Add a chord at the end
+    this.playTone(1047, 0.4, 'triangle', 0.06, 0.5);
+    this.playTone(1319, 0.4, 'triangle', 0.06, 0.5);
+  }
+
+  playPatientAngry() {
+    this.init();
+    // Dramatic descending sting
+    [300, 280, 200, 150].forEach((freq, i) => {
+      this.playTone(freq, 0.15, 'sawtooth', 0.07, i * 0.1);
+    });
+  }
+
+  playMoneyBig() {
+    this.init();
+    // Cash register ka-ching + coin cascade
+    this.playTone(1200, 0.05, 'square', 0.1);
+    this.playTone(1500, 0.05, 'square', 0.1, 0.05);
+    // Coin cascade
+    for (let i = 0; i < 6; i++) {
+      this.playTone(800 + (i * 100), 0.04, 'triangle', 0.06, 0.15 + (i * 0.05));
+    }
+  }
+
+  playCelebration() {
+    this.init();
+    // Confetti-like pops ascending
+    for (let i = 0; i < 8; i++) {
+      this.playTone(600 + (i * 150), 0.06, 'square', 0.05, i * 0.08);
+    }
+    // Final chord
+    this.playTone(1047, 0.3, 'triangle', 0.04, 0.7);
+    this.playTone(1319, 0.3, 'triangle', 0.04, 0.7);
+    this.playTone(1568, 0.3, 'triangle', 0.04, 0.7);
+  }
+
+  playDramaticReveal() {
+    this.init();
+    // Dun dun DUNNN
+    this.playTone(200, 0.2, 'sawtooth', 0.12);
+    this.playTone(200, 0.2, 'sawtooth', 0.12, 0.3);
+    this.playTone(150, 0.5, 'sawtooth', 0.15, 0.6);
   }
 
   // --- MUSIC TRACKS ---
